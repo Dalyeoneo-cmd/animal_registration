@@ -251,7 +251,7 @@ button{cursor:pointer}
 .credit{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:12px;color:var(--muted);line-height:1.6}
 .credit p{margin:0}
 .credit .maker{color:var(--ink);font-weight:500}
-.credit .maker a{color:var(--leaf);text-decoration:none;font-weight:600}
+.credit .maker b{color:var(--leaf);font-weight:600}
 .credit a{color:var(--muted)}
 .linkbtn{align-self:flex-start;border:0;background:none;padding:0;color:var(--leaf);font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .spm{display:block;width:80%;height:80%;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
@@ -470,7 +470,7 @@ function renderFoot(){
   `<div class="foot-btns"><button class="btn" id="expBtn">백업 파일 저장</button><label class="btn" for="impFile">백업 불러오기</label><input type="file" id="impFile" accept="application/json,.json" class="vh"></div>`}
   <div class="hint" id="impMsg" role="status"></div>
   <div class="credit"><button class="linkbtn" id="introAgain">사용 안내 다시 보기</button>
-  <p class="maker">만든 사람 <a href="https://github.com/Dalyeoneo-cmd" target="_blank" rel="noopener">달연어 (Dal Yeon-eo)</a> · © 2026</p>
+  <p class="maker">만든 사람 <b>달연어 (Dal Yeon-eo)</b> · © 2026</p>
   <p>이 사이트는 닌텐도와 관련 없는 팬 제작 기록장이에요. 모여봐요 동물의 숲과 주민 이름 등 관련 명칭의 권리는 Nintendo에 있어요.</p>
   <p>주민 목록 데이터: <a href="https://github.com/Norviah/animal-crossing" target="_blank" rel="noopener">Norviah/animal-crossing</a> (MIT License)</p></div>`;
   const on=(s,fn)=>{const el=$(s);if(el)el.onclick=fn};
