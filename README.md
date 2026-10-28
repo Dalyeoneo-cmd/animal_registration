@@ -28,6 +28,10 @@
 
 링크 미리보기 이미지가 메신저에서 안 보이면, `index.html`의 `og:image` 값을 `https://아이디.github.io/저장소이름/preview.png`처럼 전체 주소로 바꿔 주세요.
 
+## 만든 사람
+
+달연어 (Dal Yeon-eo) · [@Dalyeoneo-cmd](https://github.com/Dalyeoneo-cmd)
+
 ## 알림
 
 이 사이트는 Nintendo와 관련 없는 팬 제작물이에요. 모여봐요 동물의 숲과 관련 명칭의 권리는 Nintendo에 있어요.

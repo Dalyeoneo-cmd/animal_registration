@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="주민 등록부">
+<meta name="author" content="달연어 (Dal Yeon-eo)">
 <meta name="description" content="모여봐요 동물의 숲 섬 주민의 입주부터 이사까지 기록하는 개인 기록장">
 <meta property="og:title" content="우리 섬 주민 등록부">
 <meta property="og:description" content="모여봐요 동물의 숲 섬 주민의 입주부터 이사까지 기록하는 개인 기록장">
@@ -132,7 +133,7 @@ button{cursor:pointer}
 .scrim{position:fixed;inset:0;background:rgb(10 20 10 / .42);z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--paper);width:100%;max-width:560px;max-height:92vh;max-height:92dvh;overscroll-behavior:contain;overflow-y:auto;border-radius:20px 20px 0 0;padding-block:20px calc(22px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
 @media (min-width:600px){.scrim{align-items:center}.sheet{border-radius:20px;padding-bottom:22px}}
-.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;position:sticky;top:-20px;margin-top:-20px;padding-block:20px 10px;background:var(--paper);z-index:2}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;position:sticky;top:-20px;margin-top:-20px;padding-block:20px 10px;background:var(--paper);z-index:4;margin-inline:-20px;padding-inline:20px}
 .sheet::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:-8px auto 0;flex:none}
 @media (min-width:600px){.sheet::before{display:none}}
 .sheet-head h2{font-size:19px}
@@ -249,6 +250,8 @@ button{cursor:pointer}
 .intro .btn{align-self:flex-start}
 .credit{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:12px;color:var(--muted);line-height:1.6}
 .credit p{margin:0}
+.credit .maker{color:var(--ink);font-weight:500}
+.credit .maker a{color:var(--leaf);text-decoration:none;font-weight:600}
 .credit a{color:var(--muted)}
 .linkbtn{align-self:flex-start;border:0;background:none;padding:0;color:var(--leaf);font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .spm{display:block;width:80%;height:80%;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
@@ -270,6 +273,7 @@ button{cursor:pointer}
   .eyebrow{display:none}
   .card{padding:12px}
   .sheet{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .sheet-head{margin-inline:-16px;padding-inline:16px}
   .actions .btn{flex:1 1 auto}
   .dex{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -305,7 +309,7 @@ button{cursor:pointer}
   .toolbar .vt{font-size:17px}
   .scrim{padding:24px}
   .sheet{max-width:640px;max-height:88vh;border-radius:18px;padding:26px 30px 28px}
-  .sheet-head{top:-26px;margin-top:-26px;padding-block:26px 12px}
+  .sheet-head{top:-26px;margin-top:-26px;padding-block:26px 12px;margin-inline:-30px;padding-inline:30px}
   .photos{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
   .foot{max-width:720px}
 }
@@ -337,7 +341,6 @@ button{cursor:pointer}
   <button class="addbtn" id="fab" hidden aria-label="새 주민 입주" title="새 주민 입주 (N)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="addlbl">새 주민 입주</span></button>
   <button class="tab" role="tab" data-tab="timeline" id="tab-timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M4 12h16M4 18h7"/></svg><span>타임라인</span></button>
   <button class="tab" role="tab" data-tab="dex" id="tab-dex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg><span>도감</span></button>
-  <div class="side-note">기록은 이 기기의 브라우저에만 저장돼요.</div>
 </nav>
 <div id="sheetRoot"></div>
 
@@ -350,6 +353,7 @@ const HUE={"먹보":28,"운동광":8,"무뚝뚝":212,"느끼함":282,"친절함"
 const ARRIVE=["초기 주민","마일섬","캠핑장","아미보","친구섬","빈 집 자동 입주","기타"];
 const ARR_OLD={"캠핑장 방문":"캠핑장","섬 투어에서 초대":"마일섬","아미보 카드":"아미보","다른 섬에서 데려옴":"친구섬","빈 집에 랜덤 입주":"빈 집 자동 입주"};
 const RHUE={"초기 주민":95,"마일섬":200,"캠핑장":30,"아미보":350,"친구섬":265,"빈 집 자동 입주":170,"기타":60};
+const WIDE=()=>{try{return matchMedia("(min-width:960px)").matches}catch(e){return false}};
 let FINE=false;try{FINE=matchMedia("(hover:hover) and (pointer:fine)").matches}catch(e){}
 const route=v=>ARR_OLD[v.arrival]||v.arrival||"";
 const DEXMAP=new Map(DEX.map(r=>[r[0],{name:r[0],species:r[1],personality:r[2],gender:r[3],birthday:r[4],catch:r[5]}]));
@@ -460,12 +464,13 @@ async function applyBackup(){
 function renderFoot(){
   const d=S.pendingImport,f=$("#foot");
   f.innerHTML=`<h3>백업</h3>
-  <p class="hint">기록과 사진은 지금 쓰는 기기의 브라우저에만 저장돼요. 휴대폰과 PC의 기록도 서로 따로예요. 가끔 백업 파일을 저장해 두면 기기를 바꾸거나 브라우저 데이터를 지워도 되살릴 수 있어요. <b>${S.lastBackup?`마지막 백업 ${fmtDate(S.lastBackup)}`:"아직 백업한 적이 없어요."}</b></p>
+  <p class="hint">기기를 바꾸거나 휴대폰과 PC 사이에 기록을 옮길 때 백업 파일을 써요. <b>${S.lastBackup?`마지막 백업 ${fmtDate(S.lastBackup)}`:"아직 백업한 적이 없어요."}</b></p>
   ${d?`<div class="panel warm"><div>백업 파일에 주민 <b class="num">${d.villagers.length}</b>명, 사진 <b class="num">${Object.keys(d.photos||{}).length}</b>장이 있어요. 불러오면 지금 기록이 이 내용으로 바뀌어요.</div>
     <div class="actions"><button class="btn ghost" id="impNo">취소</button><button class="btn warm" id="impYes">불러오기</button></div></div>`:
   `<div class="foot-btns"><button class="btn" id="expBtn">백업 파일 저장</button><label class="btn" for="impFile">백업 불러오기</label><input type="file" id="impFile" accept="application/json,.json" class="vh"></div>`}
   <div class="hint" id="impMsg" role="status"></div>
   <div class="credit"><button class="linkbtn" id="introAgain">사용 안내 다시 보기</button>
+  <p class="maker">만든 사람 <a href="https://github.com/Dalyeoneo-cmd" target="_blank" rel="noopener">달연어 (Dal Yeon-eo)</a> · © 2026</p>
   <p>이 사이트는 닌텐도와 관련 없는 팬 제작 기록장이에요. 모여봐요 동물의 숲과 주민 이름 등 관련 명칭의 권리는 Nintendo에 있어요.</p>
   <p>주민 목록 데이터: <a href="https://github.com/Norviah/animal-crossing" target="_blank" rel="noopener">Norviah/animal-crossing</a> (MIT License)</p></div>`;
   const on=(s,fn)=>{const el=$(s);if(el)el.onclick=fn};
@@ -504,14 +509,12 @@ function render(){
   let ban="";
   if(exN&&S.canWrite)ban+=`<div class="banner"><span>둘러보기용 예시 기록 ${exN}개가 들어 있어요. 내 주민을 기록하기 전에 지워 주세요.</span><button id="clearEx">예시 지우기</button></div>`;
   if(!S.introSeen)ban+=`<section class="intro" aria-label="사용 안내"><h2>처음 오셨나요?</h2><ul>
-    <li><b>내 기록은 이 기기에만 저장돼요.</b> 같은 주소를 쓰는 다른 사람과 기록이 섞이지 않고, 로그인도 필요 없어요. 휴대폰과 PC를 같이 쓰려면 백업 파일로 옮기면 돼요.</li>
-    <li><b>가운데 + 버튼으로 주민을 등록해요.</b> 이름을 두세 글자만 치면 종족, 성격, 생일이 자동으로 채워져요.</li>
+    <li><b>기록은 이 기기에만 저장돼요.</b> 로그인이 필요 없고, 다른 사람과 기록이 섞이지 않아요. 가끔 맨 아래에서 백업 파일을 저장해 두면 기기를 바꿔도 되살릴 수 있어요.</li>
+    <li><b>${WIDE()?"왼쪽 ‘새 주민 입주’ 버튼으로":"아래 가운데 + 버튼으로"} 주민을 등록해요.</b> 이름을 두세 글자만 치면 종족, 성격, 생일이 자동으로 채워져요.</li>
     <li><b>날짜가 기억나지 않아도 괜찮아요.</b> “몇 월쯤”이나 “기억 안 나요”로 기록할 수 있어요.</li>
-    <li><b>가끔 맨 아래에서 백업 파일을 저장해 두세요.</b> 휴대폰을 바꾸거나 브라우저 데이터를 지워도 되살릴 수 있어요.</li>
-    <li><b>홈 화면에 추가하면 앱처럼 쓸 수 있어요.</b> 크롬은 메뉴 → 홈 화면에 추가, 사파리는 공유 → 홈 화면에 추가예요.</li>
+    ${FINE?"":`<li><b>홈 화면에 추가하면 앱처럼 쓸 수 있어요.</b> 크롬은 메뉴 → 홈 화면에 추가, 사파리는 공유 → 홈 화면에 추가예요.</li>`}
   </ul><button class="btn pri" id="introOk">시작하기</button></section>`;
   if(!S.idbOk)ban+=`<div class="banner"><span>이 브라우저에서는 기록을 저장할 수 없어요. 사생활 보호(시크릿) 모드라면 일반 창에서 열어 주세요.</span></div>`;
-  else if(S.villagers.length&&!S.lastBackup)ban+=`<div class="banner"><span>기록은 이 휴대폰에만 저장돼요. 맨 아래에서 백업 파일을 한 번 저장해 두세요.</span></div>`;
   if(!S.canWrite)ban+=`<div class="banner"><span>보기 전용으로 열려 있어요.</span></div>`;
   $("#banner").innerHTML=ban;
   const io=$("#introOk");if(io)io.onclick=async()=>{S.introSeen=true;try{await IDB.put("kv","introSeen",true)}catch(e){}render()};
@@ -691,6 +694,7 @@ function wireNameSuggest(){
     else if(e.key==="ArrowUp"){e.preventDefault();on=Math.max(0,on-1);draw()}
     else if(e.key==="Enter"&&on>=0){e.preventDefault();pick(items[on])}
     else if(e.key==="Escape"){e.stopPropagation();close()}});
+  const sh=inp.closest(".sheet");if(sh)sh.addEventListener("scroll",()=>{if(!ul.hidden)close()},{passive:true});
   inp.addEventListener("blur",()=>{setTimeout(close,120);const r=DEXMAP.get(inp.value.trim());if(r&&!$("#fSpecies").value)pick(r)});
 }
 
