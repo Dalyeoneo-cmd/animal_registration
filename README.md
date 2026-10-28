@@ -4,6 +4,10 @@
 
 ![미리보기](preview.png)
 
+### PC 화면
+
+![PC 화면](preview-pc.png)
+
 ## 특징
 
 - 로그인 없이 바로 쓸 수 있어요.
