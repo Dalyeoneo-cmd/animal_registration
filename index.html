@@ -317,6 +317,10 @@ button{cursor:pointer}
 .f.actions{flex-direction:row;justify-content:flex-end;flex-wrap:wrap}
 .ph-add small{font-size:11px;opacity:.8}
 .ph-add.over{border-color:var(--leaf);background:var(--leaf-soft);color:var(--leaf)}
+.basis{display:block;font-size:12.5px;color:var(--muted);margin:0}
+.intro .basis{margin-top:-4px}
+.ghead .basis{display:inline-block;background:var(--leaf-soft);color:var(--leaf);font-weight:600;border-radius:6px;padding:3px 9px;font-size:12.5px}
+.dex-count .basis{margin-top:2px}
 .intro-btns{display:flex;gap:8px;flex-wrap:wrap}
 .guide{display:flex;flex-direction:column;gap:16px}
 .ghead{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
@@ -523,7 +527,7 @@ function render(){
   const exN=S.villagers.filter(v=>v.example).length;
   let ban="";
   if(exN&&S.canWrite)ban+=`<div class="banner"><span>둘러보기용 예시 기록 ${exN}개가 들어 있어요. 내 주민을 기록하기 전에 지워 주세요.</span><button id="clearEx">예시 지우기</button></div>`;
-  if(!S.introSeen)ban+=`<section class="intro" aria-label="사용 안내"><h2>처음 오셨나요?</h2><ul>
+  if(!S.introSeen)ban+=`<section class="intro" aria-label="사용 안내"><h2>처음 오셨나요?</h2><p class="basis">모여봐요 동물의 숲(Nintendo Switch) 주민 기준이에요.</p><ul>
     <li><b>기록은 이 기기에만 저장돼요.</b> 로그인이 필요 없고, 다른 사람과 기록이 섞이지 않아요. 가끔 맨 아래에서 백업 파일을 저장해 두면 기기를 바꿔도 되살릴 수 있어요.</li>
     <li><b>${WIDE()?"왼쪽 ‘새 주민 입주’ 버튼으로":"아래 가운데 + 버튼으로"} 주민을 등록해요.</b> 이름을 두세 글자만 치면 종족, 성격, 생일이 자동으로 채워져요.</li>
     <li><b>날짜가 기억나지 않아도 괜찮아요.</b> “몇 월쯤”이나 “기억 안 나요”로 기록할 수 있어요.</li>
@@ -587,10 +591,11 @@ function guideHTML(){
   const add=W?"왼쪽 위 <b>새 주민 입주</b> 버튼":"아래 가운데 <b>+</b> 버튼";
   const sec=(t,body)=>`<section class="gsec"><h3>${t}</h3>${body}</section>`;
   return `<div class="guide">
-  <header class="ghead"><h2>사용 가이드</h2><p>주민이 섬에 오고, 함께 지내고, 떠나기까지를 기록하는 방법이에요.</p>
+  <header class="ghead"><h2>사용 가이드</h2><p>주민이 섬에 오고, 함께 지내고, 떠나기까지를 기록하는 방법이에요.</p><p class="basis">모여봐요 동물의 숲(Nintendo Switch) 주민 기준 · 2.0 업데이트와 산리오 콜라보 주민을 포함한 ${DEX.length}명</p>
   <button class="btn pri" id="guideStart">${S.villagers.length?"새 주민 등록하기":"첫 주민 등록하기"}</button></header>
   <div class="ggrid">
   ${sec("1. 시작하기",`<ul>
+    <li><b>모여봐요 동물의 숲 주민 기준이에요.</b> 이전 시리즈(튀어나와요 동물의 숲, 포켓캠프 등)에만 나오는 주민은 목록에 없어요. 목록에 없는 주민은 이름을 직접 적어 등록하면 돼요.</li>
     <li><b>로그인이 필요 없어요.</b> 기록은 지금 쓰는 기기의 브라우저에만 저장돼서, 같은 주소를 쓰는 다른 사람과 섞이지 않아요.</li>
     <li>맨 위 <b>섬 이름 정하기</b>를 누르면 제목에 섬 이름이 들어가요.</li>
     <li>위쪽 숫자 칸에서 사는 주민(최대 10명), 떠난 주민, 지박령, 사진 받은 주민 수를 한눈에 볼 수 있어요.</li></ul>`)}
@@ -645,7 +650,7 @@ function renderDex(){
 }
 function renderDexList(){
   const d=S.dex,met=new Set(S.villagers.map(v=>v.name).filter(n=>DEXMAP.has(n)));
-  $("#dexCount").innerHTML=`전체 <span class="num">${DEX.length}</span>명 중 <b class="num">${met.size}</b>명을 만났어요`;
+  $("#dexCount").innerHTML=`전체 <span class="num">${DEX.length}</span>명 중 <b class="num">${met.size}</b>명을 만났어요<span class="basis">모여봐요 동물의 숲 기준 · 2.0 업데이트, 산리오 주민 포함</span>`;
   $("#dexMeter").style.width=(met.size/DEX.length*100)+"%";
   const rows=DEX.filter(r=>{if(d.q&&!(r[0].includes(d.q)||r[5].includes(d.q)))return false;if(d.sp&&r[1]!==d.sp)return false;if(d.pe&&r[2]!==d.pe)return false;
     if(d.st){const s=statusOf(r[0]);if(d.st==="met"&&!s)return false;if(d.st==="now"&&(!s||s.st!=="now"))return false;if(d.st==="no"&&s)return false;
