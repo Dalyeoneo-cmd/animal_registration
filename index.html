@@ -335,6 +335,13 @@ button{cursor:pointer}
 .keys{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0;font-size:14px;align-items:center}
 .keys dd{margin:0}
 kbd{display:inline-block;min-width:22px;text-align:center;font:600 12px/1 var(--body);padding:4px 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--bg);color:var(--ink)}
+.titlerow{display:flex;align-items:flex-start;gap:10px}
+.titlerow .island{flex:1;min-width:0}
+.help-btn{flex:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:999px;padding:5px 11px 5px 8px;font-size:12.5px;font-weight:600;margin-top:2px}
+.help-btn svg{width:18px;height:18px}
+.help-btn[aria-pressed="true"]{border-color:var(--leaf);background:var(--leaf-soft);color:var(--leaf)}
+@media (max-width:959.98px){#tab-guide{display:none}}
+@media (min-width:960px){.help-btn{display:none}}
 .paste{width:100%;border:1px dashed var(--line);background:none;border-radius:10px;padding:9px 11px;font-size:16px;resize:none;height:44px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -344,7 +351,8 @@ kbd{display:inline-block;min-width:22px;text-align:center;font:600 12px/1 var(--
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">주민 등록부 · 입주부터 이사까지</div>
-    <div class="island" id="islandBox"></div>
+    <div class="titlerow"><div class="island" id="islandBox"></div>
+      <button class="help-btn" id="helpBtn" aria-label="사용 가이드" title="사용 가이드"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><path d="M12 17.2h.01"/></svg><span>가이드</span></button></div>
     <div class="stats" id="stats"></div>
     <div class="bday" id="bday"></div>
   </header>
@@ -542,6 +550,7 @@ function render(){
   // tabs
   document.querySelectorAll(".tab").forEach(t=>{t.setAttribute("aria-selected",t.dataset.tab===S.tab)});
   $("#fab").hidden=!S.canWrite;
+  $("#helpBtn").setAttribute("aria-pressed",S.tab==="guide");
   renderFoot();
   // view
   const view=$("#view");
@@ -881,6 +890,7 @@ function openDetail(id,sub){
 /* ---------- wiring ---------- */
 $("#tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(!t)return;S.tab=t.dataset.tab;try{localStorage.setItem("acnh-tab",S.tab)}catch(err){}render();window.scrollTo(0,0)});
 $("#fab").onclick=()=>openForm();
+$("#helpBtn").onclick=()=>{S.tab=S.tab==="guide"?"now":"guide";try{localStorage.setItem("acnh-tab",S.tab)}catch(e){}render();window.scrollTo(0,0)};
 document.addEventListener("keydown",e=>{if(sheetState||e.ctrlKey||e.metaKey||e.altKey)return;const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
   if((e.key==="n"||e.key==="N"||e.key==="ㅜ")&&S.canWrite){e.preventDefault();openForm()}
   else if(["1","2","3","4","5"].includes(e.key)){S.tab=["now","gone","timeline","dex","guide"][+e.key-1];try{localStorage.setItem("acnh-tab",S.tab)}catch(err){}render();window.scrollTo(0,0)}});
