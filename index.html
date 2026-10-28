@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3B8A55">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="주민 등록부">
+<meta name="description" content="모여봐요 동물의 숲 섬 주민의 입주부터 이사까지 기록하는 개인 기록장">
+<meta property="og:title" content="우리 섬 주민 등록부">
+<meta property="og:description" content="모여봐요 동물의 숲 섬 주민의 입주부터 이사까지 기록하는 개인 기록장">
+<meta property="og:image" content="preview.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>우리 섬 주민 등록부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+html{padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: a resident registry ledger — island header, tab strip, ID-card style resident cards, bottom sheets for forms; timeline view as a scrollable stay chart */
+:root{
+  --bg:#EDF2E4; --paper:#FFFDF6; --ink:#2C3829; --muted:#68745F; --line:#D5DDC6;
+  --leaf:#3B8A55; --leaf-soft:#DCEBD8; --sky:#3F8FBF; --sun:#D9A225; --gone:#AE7454; --gone-soft:#F2E3D8; --danger:#B4473B;
+  --av-l:86%; --av-t:26%;
+  --display:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141C16; --paper:#1D2820; --ink:#E7EEDF; --muted:#9AA892; --line:#314031;
+  --leaf:#6BC488; --leaf-soft:#22362A; --sky:#7CBCE2; --sun:#EEC45A; --gone:#D69A7A; --gone-soft:#3A2A22; --danger:#E5786B;
+  --av-l:28%; --av-t:86%; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141C16; --paper:#1D2820; --ink:#E7EEDF; --muted:#9AA892; --line:#314031;
+  --leaf:#6BC488; --leaf-soft:#22362A; --sky:#7CBCE2; --sun:#EEC45A; --gone:#D69A7A; --gone-soft:#3A2A22; --danger:#E5786B;
+  --av-l:28%; --av-t:86%; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding-block:18px calc(96px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,.disp{font-family:var(--display);font-weight:700;letter-spacing:-.015em;text-wrap:balance;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+.top{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted)}
+.island{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.island h1{font-size:clamp(21px,5.2vw,27px);line-height:1.3}
+.island h1 span{color:var(--leaf)}
+.island-edit{border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:2px}
+.island-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:9px 4px 7px;text-align:center;min-width:0}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat .sl{font-size:11.5px;color:var(--muted);line-height:1.3;word-break:keep-all}
+.stat b{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.15;color:var(--ink)}
+.stat b small{font-size:14px;color:var(--muted);font-weight:400;margin-left:1px}
+.stat.main b{color:var(--leaf)}
+.stat.full b{color:var(--sun)}
+@media (max-width:420px){.stat .sl{font-size:10.5px}.stat b{font-size:18px}}
+.bday{font-size:14px;color:var(--muted)}
+.bday strong{color:var(--ink);font-weight:400}
+
+.banner{background:var(--paper);border:1px dashed var(--line);border-radius:var(--r);padding:10px 14px;font-size:13.5px;color:var(--muted);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.banner button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 12px;font-size:13px}
+
+/* tabs */
+.tab .c{font-size:13px;opacity:.85;margin-left:4px}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.card{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--leaf)}
+.card.gone{background:var(--paper)}
+.avatar{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:22px;background:hsl(var(--h) 50% var(--av-l));color:hsl(var(--h) 40% var(--av-t))}
+.card.gone .avatar{filter:saturate(.35)}
+.cbody{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
+.cname{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cname h3{font-size:16.5px;line-height:1.2;overflow-wrap:anywhere}
+.meta{font-size:13px;color:var(--muted)}
+.days{font-family:var(--display);font-weight:600;font-size:13.5px;color:var(--leaf)}
+.card.gone .days{color:var(--gone)}
+.chip{font-size:11.5px;line-height:1.5;border-radius:4px;padding:1px 6px;border:1px solid transparent;background:var(--bg);color:var(--muted);white-space:nowrap;font-weight:600}
+.chip.ex{border:1px dashed var(--line);background:none}
+.chip.fav{background:color-mix(in srgb,var(--sun) 22%,var(--paper));color:color-mix(in srgb,var(--sun) 45%,var(--ink))}
+.chip.pic{background:color-mix(in srgb,var(--sky) 16%,var(--paper));color:color-mix(in srgb,var(--sky) 55%,var(--ink))}
+.chip.stay-mark{background:var(--leaf);color:var(--paper)}
+.chip.nopic{background:var(--gone-soft);color:var(--gone)}
+.miss{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--gone-soft);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13.5px}
+.miss b{color:var(--gone);font-weight:600}
+.miss button{border:1px solid var(--gone);background:none;color:var(--gone);border-radius:6px;padding:4px 10px;font-size:12.5px;font-weight:600}
+.miss button[aria-pressed="true"]{background:var(--gone);color:var(--paper)}
+.quick{border:1px dashed var(--sky);background:none;color:var(--sky);border-radius:999px;padding:1px 10px;font-size:12.5px;margin-left:4px}
+.checkrow{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:center}
+.checkrow label{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink)}
+.checkrow input[type=checkbox]{width:auto}
+.checkrow input[type=date]{width:auto;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:6px 9px}
+
+.empty{background:var(--paper);border:1px dashed var(--line);border-radius:var(--r);padding:28px 20px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty .disp{font-size:16.5px;color:var(--ink)}
+
+/* timeline */
+.tl{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.tl-inner{position:relative;min-width:100%}
+.tl-head{position:relative;height:28px;border-bottom:1px solid var(--line);margin-left:92px}
+.tick{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);font-size:11px;color:var(--muted);padding:6px 0 0 4px;white-space:nowrap}
+.tl-row{display:flex;align-items:center;height:36px;border-bottom:1px solid var(--line)}
+.tl-row:last-child{border-bottom:0}
+.tl-name{position:sticky;left:0;z-index:1;flex:none;width:92px;padding:0 10px;background:var(--paper);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid var(--line);height:100%;display:flex;align-items:center}
+.tl-track{position:relative;flex:none;height:100%}
+.bar{position:absolute;top:9px;height:18px;border-radius:9px;background:var(--leaf);min-width:6px;border:0;padding:0}
+.bar.gone{background:var(--gone)}
+.bar.now::after{content:"";position:absolute;right:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--sun);border:2px solid var(--paper)}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);margin:10px 2px 0;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:8px;border-radius:4px;margin-right:5px;vertical-align:middle}
+
+/* fab */
+.fab{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));border:0;border-radius:999px;background:var(--leaf);color:var(--paper);font-family:var(--display);font-weight:600;font-size:14.5px;padding:11px 18px;box-shadow:0 6px 18px rgb(0 0 0 / .18);z-index:5}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgb(10 20 10 / .42);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--paper);width:100%;max-width:560px;max-height:92vh;max-height:92dvh;overscroll-behavior:contain;overflow-y:auto;border-radius:20px 20px 0 0;padding-block:20px calc(22px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+@media (min-width:600px){.scrim{align-items:center}.sheet{border-radius:20px;padding-bottom:22px}}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;position:sticky;top:-20px;margin-top:-20px;padding-block:20px 10px;background:var(--paper);z-index:2}
+.sheet::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:-8px auto 0;flex:none}
+@media (min-width:600px){.sheet::before{display:none}}
+.sheet-head h2{font-size:19px}
+.x{border:0;background:var(--bg);border-radius:50%;width:34px;height:34px;font-size:18px;line-height:1;flex:none}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f.wide{grid-column:1/-1}
+.f label{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
+.f input,.f select,.f textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 11px;min-width:0}
+.f textarea{resize:vertical;min-height:70px}
+.row2{display:flex;gap:6px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.btn{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 16px;min-height:42px}
+.btn.pri{background:var(--leaf);border-color:var(--leaf);color:var(--paper);font-family:var(--display);font-weight:600;font-size:14px}
+.btn.warm{background:var(--gone);border-color:var(--gone);color:var(--paper);font-family:var(--display);font-weight:600;font-size:14px}
+.btn.danger{color:var(--danger);border-color:var(--danger);background:none}
+.btn.ghost{background:none}
+.err{color:var(--danger);font-size:13px;min-height:0}
+
+/* detail */
+.id-top{display:flex;gap:14px;align-items:center}
+.id-top .avatar{width:56px;height:56px;font-size:28px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14.5px;background:var(--bg);border-radius:var(--r);padding:12px 14px}
+.dl dt{color:var(--muted)}
+.dl dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.stay{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.stay .big{font-family:var(--display);font-weight:600;font-size:23px;color:var(--leaf)}
+.stay.gone .big{color:var(--gone)}
+.note{background:var(--bg);border-radius:var(--r);padding:12px 14px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px}
+.sec{display:flex;flex-direction:column;gap:8px}
+.sec h3{font-size:15px}
+.diary{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;border-left:2px solid var(--line);margin-left:6px}
+.diary li{position:relative;padding:4px 0 10px 16px}
+.diary li::before{content:"";position:absolute;left:-6px;top:10px;width:10px;height:10px;border-radius:50%;background:var(--paper);border:2px solid var(--leaf)}
+.diary li.in::before{background:var(--leaf)}
+.diary li.out::before{background:var(--gone);border-color:var(--gone)}
+.diary .d{font-size:12.5px;color:var(--muted)}
+.diary .t{white-space:pre-wrap;overflow-wrap:anywhere}
+.diary .rm{border:0;background:none;color:var(--muted);font-size:12px;padding:0 4px;text-decoration:underline}
+.add-diary{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.add-diary input[type=date]{flex:0 0 auto;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px}
+.add-diary input[type=text]{flex:1 1 180px;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px}
+.panel{border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
+.panel.warm{border-color:var(--gone);background:var(--gone-soft)}
+.loading{color:var(--muted);text-align:center;padding:30px 0}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--muted)}
+.toolbar .vt{font-weight:600;color:var(--ink);font-size:15px}
+.toolbar .sr{display:flex;align-items:center;gap:6px}
+.toolbar select{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:5px 10px;font-size:13px}
+.grp{font-size:15px;margin:16px 2px 8px;display:flex;gap:6px;align-items:baseline}
+.grp:first-of-type{margin-top:0}
+.grp span{font-family:var(--body);font-size:12.5px;color:var(--muted);font-weight:400}
+/* photos */
+.avatar{position:relative;overflow:hidden}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.avatar.ic{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-weight:400}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.ph{aspect-ratio:1;max-width:100%;border:0;padding:0;border-radius:10px;overflow:hidden;background:var(--bg);position:relative}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .cov{position:absolute;left:5px;top:5px;font-size:10.5px;background:var(--leaf);color:var(--paper);border-radius:999px;padding:0 6px}
+.ph-add{aspect-ratio:1;border:1.5px dashed var(--line);border-radius:10px;display:grid;place-items:center;text-align:center;font-size:13px;color:var(--muted);cursor:pointer;padding:6px}
+.ph-add:hover{border-color:var(--leaf);color:var(--leaf)}
+.ph-add{position:relative;overflow:hidden}
+.ph-add input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.big-photo{width:100%;max-height:60vh;object-fit:contain;border-radius:var(--r);background:var(--bg)}
+.hint{font-size:13px;color:var(--muted)}
+/* route */
+.chip.route{border-color:transparent;background:hsl(var(--rh) 45% var(--chip-l));color:hsl(var(--rh) 40% var(--chip-t))}
+:root{--chip-l:90%;--chip-t:28%}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--chip-l:24%;--chip-t:84%}}
+:root[data-theme="dark"]{--chip-l:24%;--chip-t:84%}
+.routes{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px;display:flex;flex-direction:column;gap:10px}
+.routes h3{font-size:15px}
+.rbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--bg)}
+.rbar span{height:100%;background:hsl(var(--rh) 50% 55%)}
+.rleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.rleg i{display:inline-block;width:10px;height:10px;border-radius:50%;background:hsl(var(--rh) 50% 55%);margin-right:5px;vertical-align:-1px}
+/* name suggest */
+.suggest{position:relative}
+.sug-list{position:absolute;left:0;right:0;top:100%;margin-top:4px;z-index:3;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 20px rgb(0 0 0 / .14);max-height:240px;overflow-y:auto;list-style:none;padding:4px;margin-block:4px 0}
+.sug-list button{width:100%;text-align:left;border:0;background:none;padding:7px 9px;border-radius:7px;display:flex;justify-content:space-between;gap:8px}
+.sug-list button:hover,.sug-list button.on{background:var(--leaf-soft)}
+.sug-list small{color:var(--muted)}
+/* dex */
+.dex-top{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.dex-count{font-size:14px;color:var(--muted)}
+.dex-count b{font-family:var(--display);font-weight:600;font-size:18px;color:var(--leaf)}
+.meter{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.meter span{display:block;height:100%;background:var(--leaf)}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}
+.filters input,.filters select{width:100%;min-width:0;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 10px}
+@media (max-width:560px){.filters{grid-template-columns:1fr 1fr}.filters .q{grid-column:1/-1}}
+.dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.dx{display:flex;gap:9px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:8px 10px;min-width:0}
+.dx:hover{border-color:var(--leaf)}
+.dx .avatar{width:34px;height:34px;font-size:16px}
+.dx span.t{min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.dx b{font-weight:400;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dx small{font-size:11.5px;color:var(--muted)}
+.dx.met{border-color:var(--leaf);background:var(--leaf-soft)}
+.dx.left{border-color:var(--gone);background:var(--gone-soft)}
+.dx:not(.met):not(.left) .avatar{opacity:.55}
+@media (max-width:420px){.fields{grid-template-columns:1fr}}
+.foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.foot h3{font-size:15px}
+.foot p{margin:0}
+.foot-btns{display:flex;gap:8px;flex-wrap:wrap}
+.foot-btns .btn{display:inline-flex;align-items:center;cursor:pointer}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.intro{background:var(--paper);border:1px solid var(--leaf);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;flex-direction:column;gap:10px}
+.intro h2{font-size:17px;color:var(--leaf)}
+.intro ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.55}
+.intro b{font-weight:600}
+.intro .btn{align-self:flex-start}
+.credit{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:12px;color:var(--muted);line-height:1.6}
+.credit p{margin:0}
+.credit a{color:var(--muted)}
+.linkbtn{align-self:flex-start;border:0;background:none;padding:0;color:var(--leaf);font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.spm{display:block;width:80%;height:80%;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
+.spi.ant{width:98%;height:98%;background-image:url("data:image/png;base64,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")}
+.spi{display:block;width:84%;height:84%;background:center/contain no-repeat}
+.spi.ost{background-image:url("data:image/png;base64,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")}
+/* bottom nav */
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:15;display:flex;justify-content:center;align-items:stretch;background:var(--paper);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}
+.bnav .tab{flex:1;max-width:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--muted);font-size:11.5px;font-weight:500;padding:8px 0 7px;min-height:58px}
+.bnav .tab svg{width:23px;height:23px}
+.bnav .tab[aria-selected="true"]{color:var(--leaf);font-weight:700}
+.bnav .tab[aria-selected="true"] svg{stroke-width:2.3}
+.addbtn{flex:0 0 auto;align-self:center;width:50px;height:50px;margin:0 8px;border:0;border-radius:16px;background:var(--leaf);color:var(--paper);display:grid;place-items:center;box-shadow:0 4px 12px rgb(0 0 0 / .16)}
+.addbtn svg{width:26px;height:26px;stroke-width:2.4}
+/* touch & mobile sizing */
+@media (max-width:600px){
+  .f input,.f select,.f textarea,.filters input,.filters select,.add-diary input,.toolbar select{font-size:16px}
+  .top{gap:10px;margin-bottom:14px}
+  .eyebrow{display:none}
+  .card{padding:12px}
+  .sheet{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .actions .btn{flex:1 1 auto}
+  .dex{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+.brand,.side-note,.addlbl{display:none}
+/* ---------- desktop ---------- */
+@media (min-width:960px){
+  .bnav{top:0;bottom:0;right:auto;width:236px;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;border-top:0;border-right:1px solid var(--line);padding:22px 14px calc(18px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px;font-weight:700;font-size:16px;color:var(--ink)}
+  .brand img{width:40px;height:40px;border-radius:10px}
+  .addbtn{order:-1;align-self:stretch;width:auto;height:46px;margin:0 0 14px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14.5px;font-weight:600;box-shadow:none}
+  .addbtn svg{width:20px;height:20px}
+  .addlbl{display:inline}
+  .brand{order:-2}
+  .bnav .tab{flex:0 0 auto;max-width:none;flex-direction:row;justify-content:flex-start;gap:12px;min-height:44px;padding:0 12px;border-radius:10px;font-size:14.5px}
+  .bnav .tab svg{width:21px;height:21px}
+  .bnav .tab:hover{background:var(--bg);color:var(--ink)}
+  .bnav .tab[aria-selected="true"]{background:var(--leaf-soft);color:var(--leaf)}
+  .side-note{display:block;margin-top:auto;padding:0 8px;font-size:12px;line-height:1.55;color:var(--muted)}
+  .wrap{max-width:1120px;margin:0 0 0 236px;padding-block:34px 60px;padding-left:44px;padding-right:44px}
+  @media (min-width:1400px){.wrap{margin-left:calc(236px + (100vw - 236px - 1120px)/2)}}
+  .top{flex-direction:row;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 28px;margin-bottom:26px}
+  .top .eyebrow{flex-basis:100%;margin-bottom:-8px}
+  .island h1{font-size:30px}
+  .stats{flex:0 1 560px}
+  .stat{padding:11px 6px 9px}
+  .bday{flex-basis:100%}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+  .card{padding:16px}
+  .card:hover{box-shadow:0 6px 18px rgb(0 0 0 / .06)}
+  .dex{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+  .toolbar{margin-bottom:14px}
+  .toolbar .vt{font-size:17px}
+  .scrim{padding:24px}
+  .sheet{max-width:640px;max-height:88vh;border-radius:18px;padding:26px 30px 28px}
+  .sheet-head{top:-26px;margin-top:-26px;padding-block:26px 12px}
+  .photos{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+  .foot{max-width:720px}
+}
+.f.checkrow{flex-direction:row;align-items:center}
+.f.actions{flex-direction:row;justify-content:flex-end;flex-wrap:wrap}
+.ph-add small{font-size:11px;opacity:.8}
+.ph-add.over{border-color:var(--leaf);background:var(--leaf-soft);color:var(--leaf)}
+.paste{width:100%;border:1px dashed var(--line);background:none;border-radius:10px;padding:9px 11px;font-size:16px;resize:none;height:44px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">주민 등록부 · 입주부터 이사까지</div>
+    <div class="island" id="islandBox"></div>
+    <div class="stats" id="stats"></div>
+    <div class="bday" id="bday"></div>
+  </header>
+  <div id="banner"></div>
+  <main id="view"><div class="loading">기록을 불러오는 중…</div></main>
+  <footer class="foot" id="foot"></footer>
+</div>
+<nav class="bnav" role="tablist" id="tabs">
+  <div class="brand"><img src="icon-192.png" alt=""><span>주민 등록부</span></div>
+  <button class="tab" role="tab" data-tab="now" id="tab-now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg><span>사는 주민</span></button>
+  <button class="tab" role="tab" data-tab="gone" id="tab-gone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H6v16h8"/><path d="M11 12h9"/><path d="m17 9 3 3-3 3"/></svg><span>떠난 주민</span></button>
+  <button class="addbtn" id="fab" hidden aria-label="새 주민 입주" title="새 주민 입주 (N)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="addlbl">새 주민 입주</span></button>
+  <button class="tab" role="tab" data-tab="timeline" id="tab-timeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M4 12h16M4 18h7"/></svg><span>타임라인</span></button>
+  <button class="tab" role="tab" data-tab="dex" id="tab-dex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg><span>도감</span></button>
+  <div class="side-note">기록은 이 기기의 브라우저에만 저장돼요.</div>
+</nav>
+<div id="sheetRoot"></div>
+
+<script>
+/* 주민 목록: Norviah/animal-crossing (MIT) 데이터의 한국어 이름 */
+const DEX=[["1호","고양이","운동광","M","08-01","얍"],["2호","다람쥐","아이돌","F","07-02","흠냐"],["3호","코끼리","먹보","M","10-03","으랏차"],["4호","고릴라","단순활발","F","04-14","끼얍"],["가북희","고양이","무뚝뚝","M","11-29","꺄"],["가브리엘","하마","운동광","M","03-29","오도독"],["가위","개구리","아이돌","F","01-13","그랬쪄"],["갈가리","다람쥐","무뚝뚝","M","09-14","사각사각"],["개군","개구리","먹보","M","06-06","콜록"],["거무틱","곰","무뚝뚝","M","10-23","어쩌라구"],["건태","닭","운동광","M","10-04","키득"],["고메스","호랑이","운동광","M","08-26","내참"],["곤잘레스","하마","무뚝뚝","M","08-18","그러마"],["곰도로스","곰","느끼함","M","03-31","라저"],["곰비","꼬마곰","무뚝뚝","M","08-02","참말로"],["곰시","꼬마곰","먹보","M","03-02","아니그냥"],["곱슬이","양","친절함","F","04-03","메에에"],["관록","캥거루","무뚝뚝","M","04-24","어험"],["구리구리","개구리","운동광","M","02-08","객울"],["귀오미","오리","친절함","F","03-07","그럴지도"],["그리미","다람쥐","아이돌","F","07-19","송송"],["근성","코알라","무뚝뚝","M","10-13","버텨"],["근엄","독수리","무뚝뚝","M","12-07","짜란～"],["글라햄","햄스터","느끼함","M","06-20","그렇다고"],["글레이","돼지","무뚝뚝","M","04-07","꾸엑"],["글루민","꼬마곰","아이돌","F","06-24","두근"],["금끼오","닭","무뚝뚝","M","11-23","하앗"],["기가","문어","느끼함","M","04-01","발사"],["김말이","펭귄","운동광","M","11-02","펭글펭글"],["김희","닭","먹보","M","10-14","짜잔"],["꺼벙","말","느끼함","M","09-16","게슴츠레"],["꽃지","돼지","친절함","F","03-05","땡그랑"],["나디아","사슴","단순활발","F","05-04","됐고"],["나키","오리","아이돌","F","02-23","아잉"],["나타샤","다람쥐","성숙함","F","11-30","굿굿"],["나탈리","사슴","성숙함","F","01-04","라니까"],["네이아","곰","단순활발","F","01-16","그라지"],["넬슨","사슴","느끼함","M","06-07","슴사사"],["노르망","황소","무뚝뚝","M","12-29","뭐임"],["눈송이","양","아이돌","F","08-15","꺄르르"],["늑태","늑대","무뚝뚝","M","11-05","봐봐"],["닌토","토끼","운동광","M","11-03","닌닌"],["다람","다람쥐","친절함","F","08-05","도톨도톨"],["다랑어","오리","아이돌","F","02-19","물물"],["단무지","생쥐","무뚝뚝","M","10-17","긍가벼"],["달만이","펭귄","무뚝뚝","M","04-06","아따"],["대공","곰","무뚝뚝","M","05-16","터프"],["대길","토끼","무뚝뚝","M","10-28","쿨럭"],["대장","늑대","무뚝뚝","M","12-19","그렇잖여"],["덕","개구리","운동광","M","10-09","개굴개굴"],["덕근","오리","느끼함","M","12-22","리얼리"],["덤벨","고릴라","무뚝뚝","M","09-11","겉멋"],["데이빗","하마","느끼함","M","10-15","예스"],["데자네","타조","아이돌","F","09-10","네이루"],["델리","원숭이","먹보","M","05-24","흠냐리"],["돈후앙","돼지","느끼함","M","10-13","떼끼에로"],["동동이","코알라","먹보","M","05-07","큐큐"],["드리미","개구리","먹보","M","07-08","딩동댕"],["딩요","새","운동광","M","02-02","삼바"],["땀띠","고양이","운동광","M","08-17","아뵤"],["땡칠이","개","먹보","M","08-03","그럼그럼"],["뚝심","곰","무뚝뚝","M","07-01","음"],["라라미","다람쥐","친절함","F","06-19","까꿍"],["라이오넬","사자","느끼함","M","07-29","옳거니"],["라자냐","생쥐","아이돌","F","02-24","룰룰"],["래미","염소","먹보","M","01-18","흐아앙"],["럭키","개","먹보","M","11-04","그렇대"],["레베카","다람쥐","성숙함","F","09-10","쯧쯧"],["레이니","개구리","친절함","F","02-04","그래요"],["레이라","펭귄","단순활발","F","09-02","맞잖아"],["레이첼","곰","단순활발","F","03-22","야호야호"],["렉스","사자","먹보","M","07-24","티라이온"],["로데오","황소","먹보","M","10-29","디용"],["로보","늑대","무뚝뚝","M","11-25","거봐"],["로빈","개","먹보","M","05-13","멍멍"],["로타","토끼","아이돌","F","06-14","울랄라"],["록키","사슴","운동광","M","11-07","슉슉"],["론다","코뿔소","친절함","F","01-24","훗"],["루나","토끼","아이돌","F","12-25","보통이지"],["루시","돼지","친절함","F","06-02","예예"],["루주","호랑이","아이돌","F","08-27","쪼옥쪽"],["리아나","말","단순활발","F","06-04","쉬익"],["리처드","오리","먹보","M","01-03","그래유"],["리카","생쥐","성숙함","F","10-23","흐으음"],["리카르도","늑대","느끼함","M","12-06","오우예"],["리키","다람쥐","먹보","M","06-03","예용"],["릭","사자","운동광","M","07-10","하하하"],["린다","개구리","성숙함","F","08-11","베이비"],["릴라","고릴라","아이돌","F","11-01","헬로"],["릴리","늑대","친절함","F","03-24","후와와"],["릴리안","토끼","아이돌","F","05-09","그렇지뭐"],["링링","곰","아이돌","F","09-09","와"],["마가렛","돼지","친절함","F","09-03","유후"],["마롱","개","아이돌","F","01-11","달코미"],["마르","고양이","친절함","F","09-25","야～옹"],["마르카","생쥐","친절함","F","06-12","내말이요"],["마리","양","성숙함","F","11-26","됐거든"],["마리모","오리","친절함","F","06-27","우우"],["마리아","캥거루","친절함","F","05-31","조아요"],["마릴린","오리","성숙함","F","08-12","유～후"],["마미","캥거루","친절함","F","12-05","오롤로"],["마사마","말","먹보","M","01-10","그런가"],["마스카라스","새","느끼함","M","12-12","까아악"],["마이크","캥거루","무뚝뚝","M","12-01","아자"],["마철이","말","먹보","M","05-01","다그닥"],["마치","코알라","단순활발","F","03-21","바삭"],["마티","꼬마곰","먹보","M","04-16","폼폼"],["마틸다","소","성숙함","F","08-25","우유우유"],["만복이","고릴라","운동광","M","09-12","야임마"],["말자","말","친절함","F","11-28","몰라요"],["맘모","코끼리","먹보","M","09-07","뿌뿌"],["머슬","고릴라","운동광","M","03-26","하압"],["머피","꼬마곰","무뚝뚝","M","12-29","샐리"],["먹고파","돼지","먹보","M","12-30","아님말구"],["메리어스","양","친절함","F","04-16","쩝"],["메이","꼬마곰","친절함","F","05-21","있죠"],["메이첼","꼬마곰","친절함","F","06-15","저기요"],["멜버른","코알라","친절함","F","08-19","반짝"],["멧지","돼지","운동광","M","04-26","냠냠"],["모니카","늑대","아이돌","F","08-31","아하핫"],["모리스","황소","먹보","M","04-20","알것소"],["몽자","원숭이","성숙함","F","03-21","몽몽"],["몽티","원숭이","무뚝뚝","M","12-07","바나나"],["무뚝","곰","무뚝뚝","M","07-31","냅둬"],["문대","새","운동광","M","07-25","츠츠츠"],["문리나","문어","친절함","F","06-26","캬캬"],["문복","문어","무뚝뚝","M","09-20","쭉쭉"],["미란다","오리","성숙함","F","04-23","괜찮아"],["미랑","토끼","단순활발","F","07-06","거봐라"],["미미","토끼","아이돌","F","03-03","어뜨케"],["미애","꼬마곰","성숙함","F","03-10","어머머"],["미자","소","친절함","F","09-20","에헤"],["미첼","토끼","먹보","M","05-19","동글"],["민트","다람쥐","성숙함","F","05-02","우훗"],["밀크","소","아이돌","F","05-10","음메"],["바네사","늑대","성숙함","F","01-26","그러하다"],["바닐라","개","친절함","F","11-16","그렇죠"],["바바라","염소","단순활발","F","12-26","그러게"],["바슬레","토끼","성숙함","F","01-09","라던데"],["바야시코프","말","운동광","M","04-04","농담"],["박사","돼지","운동광","M","10-07","이노라"],["박하스","곰","먹보","M","08-16","힘내"],["반데스","황소","무뚝뚝","M","04-30","후후"],["밥","개","느끼함","M","11-24","안보여"],["백프로","고양이","아이돌","F","06-17","귤귤"],["백희","호랑이","아이돌","F","12-13","그래호"],["밴덤","고양이","무뚝뚝","M","12-10","쳇"],["범호","호랑이","운동광","M","05-15","어흥"],["베리","개","아이돌","F","06-18","초롱초롱"],["베어드","곰","느끼함","M","09-27","오홍홍"],["베이글","개","친절함","F","10-15","쫀득"],["베티","하마","친절함","F","04-25","맞습니다"],["벤","개","먹보","M","06-10","컹컹"],["벨마","염소","성숙함","F","01-14","똑바로해"],["병태","곰","운동광","M","09-26","입네다"],["보리","돼지","무뚝뚝","M","11-06","쌀"],["보스터","햄스터","무뚝뚝","M","06-26","알겠냐"],["보이드","고릴라","무뚝뚝","M","10-01","오우오우"],["복자","생쥐","성숙함","F","09-05","오호호"],["볼트","펭귄","느끼함","M","10-06","베이베"],["봉","오리","먹보","M","05-25","엄마"],["봉추","꼬마곰","운동광","M","01-02","몽"],["부케","고양이","아이돌","F","02-27","헤이"],["브로콜리","생쥐","먹보","M","06-30","앗차"],["브루스","사슴","무뚝뚝","M","05-26","아비옹"],["브리트니","돼지","성숙함","F","11-14","어우야"],["블랜더","개","성숙함","F","10-25","흥"],["비니거","토끼","먹보","M","12-03","아으셔"],["비앙카","늑대","성숙함","F","09-17","멋져"],["비티","하마","성숙함","F","10-06","쩝쩝"],["빅토리아","타조","친절함","F","01-15","그렇지라"],["빌리","염소","무뚝뚝","M","08-29","예이예"],["빙수","펭귄","먹보","M","01-29","땡땡"],["빙티","고양이","먹보","M","04-11","노라줘"],["뽀야미","햄스터","친절함","F","01-30","뽀드득"],["뿌람","코뿔소","먹보","M","03-20","뿔뿔"],["뿔님이","코뿔소","단순활발","F","05-28","킁킁"],["삐로코","악어","느끼함","M","05-02","삐리리"],["사라","생쥐","성숙함","F","07-07","글치머"],["사반나","말","친절함","F","01-25","맞아요"],["사브리나","펭귄","성숙함","F","10-16","으쓱"],["사이다","고양이","친절함","F","03-27","퐁퐁"],["사지마","개미핥기","무뚝뚝","M","03-09","임돠"],["사탕","생쥐","아이돌","F","04-13","달짝지근"],["산드라","늑대","성숙함","F","12-14","유행이야"],["산토스","토끼","느끼함","M","07-24","아미고"],["샌디","타조","친절함","F","10-21","그렇다조"],["샐리","코끼리","친절함","F","01-28","샬랄라"],["샘","개구리","무뚝뚝","M","08-21","므흣"],["샤브렌","말","먹보","M","10-05","히히힝"],["샨티","햄스터","성숙함","F","08-09","파샤샤"],["샹펜","개","무뚝뚝","M","10-30","참나"],["서머","토끼","아이돌","F","03-14","룰루랄라"],["선글","사자","운동광","M","08-08","요～맨"],["설백","개미핥기","친절함","F","02-06","하양하양"],["세바스찬","독수리","운동광","M","01-08","퍼덕퍼덕"],["센트엘로","말","아이돌","F","07-11","달리자"],["소면","개미핥기","친절함","F","02-10","후루룩"],["솔미","사슴","친절함","F","03-26","파샵파샵"],["쇼콜라","고양이","성숙함","F","02-15","자갸"],["순이","염소","친절함","F","08-24","그랬슈"],["슈베르트","말","무뚝뚝","M","06-16","부르르"],["스나일","고릴라","느끼함","M","12-05","알만하다"],["스누티","개미핥기","성숙함","F","10-24","추릅"],["스미모","오리","성숙함","F","11-17","모모"],["스쿼트","코뿔소","무뚝뚝","M","06-17","빠직"],["스트로","개구리","느끼함","M","07-09","싸우자"],["스트로베리","코뿔소","친절함","F","03-19","베리베리"],["스파크","다람쥐","무뚝뚝","M","07-09","콰광"],["스피카","다람쥐","친절함","F","09-11","빤짝"],["시드니","코알라","친절함","F","06-21","발그레"],["시몬","원숭이","먹보","M","01-19","하옵니다"],["시베리아","늑대","무뚝뚝","M","12-18","콜록콜록"],["시온","독수리","단순활발","F","01-20","확실히"],["신디","호랑이","성숙함","F","11-22","잇힝"],["신옥","타조","성숙함","F","12-21","그랬구나"],["실루엣","다람쥐","성숙함","F","07-03","헤헤헤"],["실바나","다람쥐","친절함","F","10-22","퓨우"],["실부플레","말","성숙함","F","12-02","봉쥬르"],["실비아","캥거루","단순활발","F","05-03","이자슥"],["아그네스","돼지","단순활발","F","04-21","꿀꾸루"],["아네사","꼬마곰","단순활발","F","06-23","차라리"],["아더","사자","운동광","M","08-07","크릉"],["아델레이드","코알라","친절함","F","04-12","정말로요"],["아롱이","개미핥기","아이돌","F","02-16","정말"],["아리아","닭","성숙함","F","12-09","도레미"],["아마민","토끼","먹보","M","08-10","나도나도"],["아세로라","꼬마곰","아이돌","F","03-17","어쩜이래"],["아이다","개구리","단순활발","F","10-02","흐응"],["아이다호","꼬마곰","운동광","M","09-28","나는나야"],["아이리스","다람쥐","단순활발","F","08-30","알아알아"],["아이소토프","말","성숙함","F","02-09","훗훗"],["아잠만","오리","먹보","M","06-30","꽥꽥"],["아크릴","양","친절함","F","04-09","울"],["아폴로","독수리","무뚝뚝","M","07-04","다꿇어"],["안데스","독수리","성숙함","F","11-19","엄멈머"],["안소니","말","느끼함","M","05-22","이거봐"],["안젤라","캥거루","성숙함","F","11-12","응"],["안쵸비","새","먹보","M","03-04","이어라"],["안토니오","개미핥기","느끼함","M","05-19","무쵸"],["알베르트","악어","먹보","M","06-09","나아거"],["애플","햄스터","아이돌","F","09-24","큐룽"],["애플리케","캥거루","친절함","F","10-11","폴짝"],["앤","오리","성숙함","F","04-08","우아"],["앨런","고릴라","무뚝뚝","M","09-06","우갸우갸"],["앨리","악어","친절함","F","05-17","아거얌"],["야곱","새","먹보","M","08-24","그거야"],["에끌레르","코끼리","친절함","F","05-12","트랄라"],["에드워드","개","먹보","M","12-31","하옵소서"],["에뜨와르","양","친절함","F","12-25","폭신폭신"],["에바","닭","친절함","F","04-28","그랬대요"],["에스메랄다","개구리","친절함","F","10-27","쪼오옥"],["에이프릴","원숭이","아이돌","F","04-02","와우"],["엑스엘리","코끼리","운동광","M","03-23","히힛"],["엘레핀","코끼리","성숙함","F","12-08","훨훨"],["연유","곰","아이돌","F","09-15","사르르"],["염두리","염소","느끼함","M","06-28","웁스"],["예링","고양이","아이돌","F","03-30","우앙"],["오골","닭","느끼함","M","12-23","깜깜"],["오로라","펭귄","친절함","F","01-27","랄라"],["오즈먼드","코알라","운동광","M","10-12","우와"],["오팔","코끼리","성숙함","F","01-20","땡"],["올리버","하마","무뚝뚝","M","01-07","냉큼오슈"],["올리브","꼬마곰","친절함","F","07-12","오잉"],["올리비아","고양이","성숙함","F","02-03","머냐"],["왕서방","개구리","운동광","M","12-17","라이라이"],["요비","사슴","아이돌","F","10-31","아무튼"],["용남이","악어","먹보","M","02-12","띠용띠용"],["우띠","꼬마곰","먹보","M","06-11","아이참"],["우락","고릴라","먹보","M","10-18","부락"],["원승","원숭이","운동광","M","11-21","빠샤"],["웬디","양","단순활발","F","07-16","포테토"],["유네찌","고양이","아이돌","F","06-29","냥냥"],["유니오","말","느끼함","M","03-15","그대여"],["유카리","코알라","성숙함","F","07-20","어맛"],["윤이","염소","친절함","F","03-06","맞아유"],["은수리","독수리","운동광","M","12-11","호옷"],["이요","토끼","친절함","F","03-01","삐용"],["이자벨","생쥐","아이돌","F","12-28","캬학"],["일섭","새","무뚝뚝","M","01-27","오예"],["자끄","사슴","먹보","M","07-27","뚜비뚜바"],["잔디","양","성숙함","F","10-21","달려"],["재스민","꼬마곰","친절함","F","05-18","띵호아"],["잭슨","고양이","느끼함","M","10-01","우쭐"],["쟝","생쥐","운동광","M","08-14","무진장"],["제시카","사슴","단순활발","F","09-19","핑크크"],["제인","고양이","성숙함","F","09-30","우"],["제천","원숭이","운동광","M","08-18","긁적"],["젤리","원숭이","단순활발","F","04-10","우끼네"],["조르쥐","생쥐","무뚝뚝","M","01-17","힐끔힐끔"],["존","개","무뚝뚝","M","11-01","아니"],["주디","오리","아이돌","F","02-11","다삐"],["줄리아","타조","성숙함","F","07-31","어머몰라"],["줌마","고릴라","성숙함","F","09-01","에그머닛"],["지미","햄스터","느끼함","M","11-10","휴우"],["지키미","오리","운동광","M","06-13","꾸왁"],["진상","고양이","먹보","M","01-12","그치"],["쪼끼","새","느끼함","M","06-22","체키라웃"],["쭈니","다람쥐","느끼함","M","09-29","어차피"],["찍순이","생쥐","아이돌","F","02-05","그러찍"],["차둘","양","운동광","M","03-18","뿜뿜"],["차코","하마","아이돌","F","09-18","히포포"],["찰스","고양이","운동광","M","12-20","그러거나"],["참돌이","새","운동광","M","07-17","그쵸"],["챔프","개","운동광","M","11-11","우물우물"],["챠미","곰","단순활발","F","04-17","으랏차차"],["철소","황소","운동광","M","04-29","땅땅"],["철컥","개구리","운동광","M","02-13","오버"],["체리","돼지","아이돌","F","05-23","아앙"],["첼시","사슴","친절함","F","01-18","하트하트"],["초코","토끼","아이돌","F","01-06","진짜진짜"],["쵸이","고양이","단순활발","F","04-27","휘리릭"],["춘섭","새","운동광","M","11-20","섭섭"],["충성","개구리","무뚝뚝","M","06-05","와이"],["츄양","곰","무뚝뚝","M","07-22","그럼"],["치즈","생쥐","느끼함","M","12-15","꼬리꼬리"],["카라멜","개","친절함","F","12-27","왈왈"],["카로틴","말","아이돌","F","01-31","당근당근"],["카를로스","양","느끼함","M","05-08","자기야"],["카일","개구리","먹보","M","07-21","이리오슈"],["캐롤라인","다람쥐","친절함","F","07-15","휴"],["캐비어","고양이","친절함","F","10-08","뭐라지요"],["캐시미어","양","성숙함","F","04-02","포근포근"],["캔디","곰","친절함","F","03-13","낼름"],["캔버라","코알라","단순활발","F","05-14","어어"],["케인","타조","느끼함","M","11-27","호롤로"],["케첩","오리","아이돌","F","07-27","찌익"],["켄","늑대","무뚝뚝","M","02-17","음음"],["코알","코알라","느끼함","M","10-26","야야야"],["코코아","오리","운동광","M","02-01","탕"],["쿠스케처","독수리","무뚝뚝","M","02-22","내놔"],["크로크","악어","성숙함","F","11-08","얘야"],["크리미","펭귄","아이돌","F","02-20","꽁꽁"],["크리스","다람쥐","운동광","M","02-26","땡글땡글"],["크리스틴","토끼","아이돌","F","08-28","샤방"],["클레오","고양이","성숙함","F","09-22","파트라"],["키키","원숭이","친절함","F","08-23","끼끼"],["킹","사자","무뚝뚝","M","07-23","안그냐"],["타마","고양이","성숙함","F","05-29","냠"],["타키","타조","먹보","M","09-23","오요용"],["탁호","문어","먹보","M","03-08","약히"],["택주","타조","성숙함","F","11-13","역시"],["탱고","돼지","아이돌","F","07-28","거라예"],["탱크","코뿔소","운동광","M","05-06","아뿔소"],["텀보","개구리","운동광","M","08-03","흐압"],["토니","토끼","먹보","M","03-16","그렇잖아"],["토미","개","먹보","M","08-04","옙"],["토비","토끼","느끼함","M","07-10","케로케로"],["토시","토끼","운동광","M","01-21","땡글"],["톰슨","사슴","느끼함","M","08-20","엣헴"],["투투","개구리","무뚝뚝","M","07-18","툴툴"],["트로와","양","성숙함","F","03-28","앤쥬"],["티나","코끼리","친절함","F","11-18","따끈따끈"],["티미","생쥐","친절함","F","02-18","찍찍"],["티본","황소","무뚝뚝","M","05-20","워메에"],["티볼트","호랑이","운동광","M","08-19","으르렁"],["티처","사자","느끼함","M","08-14","졸지마"],["티파니","독수리","친절함","F","03-25","그래맞아"],["파도맨","악어","무뚝뚝","M","05-27","처얼썩"],["파슬리","다람쥐","친절함","F","09-04","랄랄라"],["파올로","코끼리","먹보","M","05-05","파오"],["파이프","새","아이돌","F","04-18","허나"],["파타야","닭","단순활발","F","10-12","그게어때"],["파틱","새","성숙함","F","12-04","글쎄"],["패치","꼬마곰","먹보","M","02-10","그런거죠"],["패트라","개미핥기","아이돌","F","11-09","라지요"],["패티카","토끼","아이돌","F","12-16","꺄오"],["팬타","꼬마곰","먹보","M","08-06","부끄"],["팽기","펭귄","먹보","M","02-07","에헴헴"],["퍼머거","개미핥기","운동광","M","10-20","진짜로"],["펑크스","코끼리","무뚝뚝","M","06-09","피스"],["펑키맘","캥거루","성숙함","F","09-08","뭘봐"],["페니실린","닭","먹보","M","10-10","우힛"],["페더","새","운동광","M","08-11","겁나"],["페튜니아","코뿔소","성숙함","F","12-18","세봉"],["펭구","펭귄","먹보","M","12-24","중얼중얼"],["펭수","펭귄","운동광","M","01-05","팽팽"],["포크","돼지","먹보","M","09-03","꼬르륵"],["폴라","펭귄","성숙함","F","01-23","우훗훗"],["푸아그라","오리","먹보","M","06-25","어쩌면"],["풍작","악어","운동광","M","08-07","만세"],["프랑소와","토끼","성숙함","F","01-22","쇼봉"],["프랭크","독수리","느끼함","M","06-01","수리수리"],["프릴","양","단순활발","F","02-14","수고"],["플라라","타조","아이돌","F","02-09","밍고밍고"],["피스","생쥐","운동광","M","07-05","쪽"],["피엘","양","느끼함","M","04-19","므흐흐"],["피카","코끼리","아이돌","F","03-06","롤롤"],["피터","사슴","먹보","M","04-05","우왕"],["핀틱","새","아이돌","F","07-13","크"],["핑","생쥐","운동광","M","09-13","짜샤"],["핑글이","새","친절함","F","03-12","핑그르르"],["핑키","다람쥐","아이돌","F","06-08","거얌"],["하이드","악어","운동광","M","11-15","부스럭"],["하키","펭귄","먹보","M","02-21","엣취"],["한나","개","단순활발","F","05-11","그냥저냥"],["햄까스","돼지","운동광","M","07-26","꿀꿀"],["햄둥","햄스터","먹보","M","10-19","둥게둥게"],["햄스틴","햄스터","운동광","M","05-30","햄햄"],["햄쥐","햄스터","무뚝뚝","M","02-25","카악"],["헐크","독수리","무뚝뚝","M","07-30","크헐"],["헤르츠","타조","운동광","M","12-01","치지직"],["헨리","개구리","느끼함","M","09-21","음냐음냐"],["호냥이","고양이","아이돌","F","08-13","삐뽀"],["호떡","펭귄","먹보","M","10-30","뒤집어"],["호랭이","호랑이","무뚝뚝","M","08-22","근데"],["홉킨스","토끼","먹보","M","03-11","뿌우"],["화자","소","성숙함","F","02-28","메르시"],["휘니","타조","단순활발","F","04-22","아뜨뜨"],["휴지","코끼리","먹보","M","07-14","휴휴"],["히죽","고양이","먹보","M","01-01","고양이"],["히킨","닭","성숙함","F","10-24","오싹오싹"],["힘드러","염소","운동광","M","03-25","알아줘"]];
+const SPECIES=["개","개구리","개미핥기","고릴라","고양이","곰","꼬마곰","늑대","닭","다람쥐","독수리","돼지","말","문어","사슴","사자","새","생쥐","소","악어","양","염소","오리","원숭이","캥거루","코끼리","코뿔소","코알라","타조","토끼","펭귄","하마","햄스터","호랑이","황소"];
+const PERS=["먹보","운동광","무뚝뚝","느끼함","친절함","아이돌","성숙함","단순활발"];
+const HUE={"먹보":28,"운동광":8,"무뚝뚝":212,"느끼함":282,"친절함":140,"아이돌":330,"성숙함":48,"단순활발":188};
+const ARRIVE=["초기 주민","마일섬","캠핑장","아미보","친구섬","빈 집 자동 입주","기타"];
+const ARR_OLD={"캠핑장 방문":"캠핑장","섬 투어에서 초대":"마일섬","아미보 카드":"아미보","다른 섬에서 데려옴":"친구섬","빈 집에 랜덤 입주":"빈 집 자동 입주"};
+const RHUE={"초기 주민":95,"마일섬":200,"캠핑장":30,"아미보":350,"친구섬":265,"빈 집 자동 입주":170,"기타":60};
+let FINE=false;try{FINE=matchMedia("(hover:hover) and (pointer:fine)").matches}catch(e){}
+const route=v=>ARR_OLD[v.arrival]||v.arrival||"";
+const DEXMAP=new Map(DEX.map(r=>[r[0],{name:r[0],species:r[1],personality:r[2],gender:r[3],birthday:r[4],catch:r[5]}]));
+const photoURL=id=>"/_blob/"+encodeURIComponent(id);
+const photoSrc=p=>S.photoURLs.get(p.id)||"";
+function imgTag(p,extra){const src=photoSrc(p);return `<img data-pid="${esc(p.id)}" ${src?`src="${src}"`:""} alt="" ${extra||""} onerror="this.style.visibility='hidden'">`}
+const SP_ICON={"고양이":"🐱","개":"🐶","토끼":"🐰","다람쥐":"🐿️","개구리":"🐸","꼬마곰":"🧸","곰":"🐻","오리":"🦆","생쥐":"🐭","돼지":"🐷","말":"🐴","새":"🐦","펭귄":"🐧","양":"🐑","코끼리":"🐘","사슴":"🦌","늑대":"🐺","고릴라":"🦍","코알라":"🐨","독수리":"🦅","햄스터":"🐹","닭":"🐔","원숭이":"🐵","악어":"🐊","캥거루":"🦘","염소":"🐐","코뿔소":"🦏","호랑이":"🐯","하마":"🦛","사자":"🦁","황소":"🐂","문어":"🐙","소":"🐮"};
+const LEAVE=["이사 상담을 받아들임","내가 먼저 부탁함","모르는 새 이사 결정","다른 섬으로 보냄","기타"];
+const MAX=10;
+
+const S={introSeen:true,photoURLs:new Map(),idbOk:false,lastBackup:"",pendingImport:null,mode:null,db:null,assets:null,canWrite:true,villagers:[],island:{name:""},tab:"now",editIsland:false,dex:{q:"",sp:"",pe:"",st:""}};
+S.sort={now:"",gone:""};
+try{const t=localStorage.getItem("acnh-tab");if(t)S.tab=t;const so=JSON.parse(localStorage.getItem("acnh-sort")||"null");if(so)S.sort={...S.sort,...so}}catch(e){}
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+const toUTC=s=>{const[y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)};
+const daysBetween=(a,b)=>Math.round((toUTC(b)-toUTC(a))/864e5);
+function fmtDate(s,p){if(!s)return "날짜 모름";const[y,m,d]=s.split("-").map(Number);return p==="month"?`${y}년 ${m}월쯤`:`${y}년 ${m}월 ${d}일`}
+function fmtShort(s,p){if(!s)return "?";const[y,m,d]=s.split("-").map(Number);return p==="month"?`${String(y).slice(2)}.${String(m).padStart(2,"0")}쯤`:`${String(y).slice(2)}.${String(m).padStart(2,"0")}.${String(d).padStart(2,"0")}`}
+function fmtBday(b){if(!b)return "";const[m,d]=b.split("-").map(Number);return `${m}월 ${d}일`}
+const isNow=v=>!v.moveOut&&!v.left;
+function stayDays(v){if(!v.moveIn)return null;if(!isNow(v)&&!v.moveOut)return null;return daysBetween(v.moveIn,v.moveOut||todayStr())}
+const approx=v=>v.inPrec==="month"||(!isNow(v)&&v.outPrec==="month");
+function stayText(n,ap){if(n==null)return "기간 모름";if(n<0)return "입주 예정";if(n<1)return "오늘 입주";const y=Math.floor(n/365),rest=n%365;return (ap?"약 ":"")+(y?`${y}년 ${rest}일`:`${n}일`)}
+function nowText(v,n){return n==null?"입주일 모름":n>=1?`입주 ${approx(v)?"약 ":""}${n}일째`:stayText(n)}
+const inKey=v=>v.moveIn||"0000",outKey=v=>v.moveOut||v.moveIn||"0000";
+function datePick(id,label,val,prec){prec=prec||"day";const mv=val?val.slice(0,7):"";
+  return `<div class="f"><label for="${id}P">${label}</label><select id="${id}P"><option value="day" ${prec==="day"?"selected":""}>날짜를 알아요</option><option value="month" ${prec==="month"?"selected":""}>몇 월쯤인지만 알아요</option><option value="unknown" ${prec==="unknown"?"selected":""}>기억 안 나요</option></select>
+  <input type="date" id="${id}D" value="${prec==="day"?esc(val||""):""}" aria-label="${label} 날짜"><input type="month" id="${id}M" value="${prec==="month"?esc(mv):""}" placeholder="2026-03" aria-label="${label} 년월"></div>`}
+function wireDate(id){const p=$("#"+id+"P");const f=()=>{$("#"+id+"D").hidden=p.value!=="day";$("#"+id+"M").hidden=p.value!=="month"};p.onchange=f;f()}
+function readDate(id){const p=$("#"+id+"P").value;if(p==="unknown")return{date:"",prec:"unknown"};
+  if(p==="month"){const m=$("#"+id+"M").value.trim();return /^\d{4}-\d{2}$/.test(m)?{date:m+"-01",prec:"month"}:{err:true}}
+  const d=$("#"+id+"D").value;return d?{date:d,prec:"day"}:{err:true}}
+function newId(){return "v"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+
+/* ---------- storage: IndexedDB in this browser ---------- */
+const IDB={db:null,
+  open(){return new Promise((res,rej)=>{const r=indexedDB.open("acnh-registry",1);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("kv"))d.createObjectStore("kv");if(!d.objectStoreNames.contains("photos"))d.createObjectStore("photos")};r.onsuccess=()=>{this.db=r.result;res()};r.onerror=()=>rej(r.error)})},
+  run(store,mode,fn){return new Promise((res,rej)=>{const t=this.db.transaction(store,mode),q=fn(t.objectStore(store));t.oncomplete=()=>res(q?q.result:undefined);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)})},
+  get(store,k){return this.run(store,"readonly",s=>s.get(k))},
+  put(store,k,v){return this.run(store,"readwrite",s=>s.put(v,k))},
+  del(store,k){return this.run(store,"readwrite",s=>s.delete(k))},
+  clear(store){return this.run(store,"readwrite",s=>s.clear())},
+  all(store){return new Promise((res,rej)=>{const t=this.db.transaction(store),st=t.objectStore(store),ks=st.getAllKeys(),vs=st.getAll();t.oncomplete=()=>res(ks.result.map((k,i)=>[k,vs.result[i]]));t.onerror=()=>rej(t.error)})}};
+async function persist(){if(!S.idbOk)return;await IDB.put("kv","data",{villagers:S.villagers,island:S.island})}
+
+async function putVillager(v){
+  const i=S.villagers.findIndex(x=>x.id===v.id);if(i>=0)S.villagers[i]=v;else S.villagers.push(v);
+  await persist();render();
+}
+async function delVillager(id){
+  const v=S.villagers.find(x=>x.id===id);
+  S.villagers=S.villagers.filter(x=>x.id!==id);await persist();
+  for(const p of (v&&v.photos)||[])await dropPhoto(p.id);
+  render();
+}
+async function putIsland(name){S.island={name};await persist();render()}
+function writeFailed(e){
+  if(e&&e.name==="QuotaExceededError")return "휴대폰 저장 공간이 부족해요. 사진을 몇 장 지운 뒤 다시 저장해 주세요.";
+  return "저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.";
+}
+
+async function boot(){
+  S.mode="local";
+  try{
+    await IDB.open();
+    const d=await IDB.get("kv","data");if(d){S.villagers=d.villagers||[];S.island=d.island||{name:""}}
+    S.lastBackup=(await IDB.get("kv","lastBackup"))||"";
+    S.introSeen=!!(await IDB.get("kv","introSeen"));
+    for(const [k,b] of await IDB.all("photos"))S.photoURLs.set(k,URL.createObjectURL(b));
+    S.idbOk=true;
+  }catch(e){S.idbOk=false;S.introSeen=false;console.warn(e)}
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  render();
+}
+
+/* ---------- backup ---------- */
+const blobToDataURL=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b)});
+async function exportBackup(){
+  const msg=$("#impMsg");msg.textContent="백업 파일을 만드는 중…";
+  try{
+    const photos={};for(const [k,b] of await IDB.all("photos"))photos[k]=await blobToDataURL(b);
+    const data={app:"acnh-registry",version:1,exportedAt:new Date().toISOString(),island:S.island,villagers:S.villagers,photos};
+    const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"}));
+    const a=document.createElement("a");a.href=url;a.download=`주민등록부-백업-${todayStr()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+    S.lastBackup=todayStr();await IDB.put("kv","lastBackup",S.lastBackup);renderFoot();
+    $("#impMsg").textContent="백업 파일을 저장했어요. 다운로드 폴더를 확인해 주세요.";
+  }catch(e){msg.textContent="백업 파일을 만들지 못했어요. 다시 눌러 주세요."}
+}
+async function readBackup(file){
+  try{const d=JSON.parse(await file.text());if(!d||!Array.isArray(d.villagers))throw 0;S.pendingImport=d}
+  catch(e){S.pendingImport=null;renderFoot();$("#impMsg").textContent="주민 등록부 백업 파일이 아니에요. 저장해 둔 .json 파일을 골라 주세요.";return}
+  renderFoot();
+}
+async function applyBackup(){
+  const d=S.pendingImport;if(!d)return;$("#impMsg").textContent="불러오는 중…";
+  try{
+    await IDB.clear("photos");S.photoURLs.forEach(u=>URL.revokeObjectURL(u));S.photoURLs.clear();
+    for(const [k,u] of Object.entries(d.photos||{})){const b=await (await fetch(u)).blob();await IDB.put("photos",k,b);S.photoURLs.set(k,URL.createObjectURL(b))}
+    S.villagers=d.villagers.map(v=>({...v,photos:(v.photos||[]).filter(p=>S.photoURLs.has(p.id)).map(p=>({...p,kind:"local"}))}));
+    S.island=d.island||{name:""};await persist();S.pendingImport=null;render();
+    $("#impMsg").textContent=`주민 ${S.villagers.length}명의 기록을 불러왔어요.`;
+  }catch(e){$("#impMsg").textContent="불러오지 못했어요. 휴대폰 저장 공간을 확인한 뒤 다시 해 주세요."}
+}
+function renderFoot(){
+  const d=S.pendingImport,f=$("#foot");
+  f.innerHTML=`<h3>백업</h3>
+  <p class="hint">기록과 사진은 지금 쓰는 기기의 브라우저에만 저장돼요. 휴대폰과 PC의 기록도 서로 따로예요. 가끔 백업 파일을 저장해 두면 기기를 바꾸거나 브라우저 데이터를 지워도 되살릴 수 있어요. <b>${S.lastBackup?`마지막 백업 ${fmtDate(S.lastBackup)}`:"아직 백업한 적이 없어요."}</b></p>
+  ${d?`<div class="panel warm"><div>백업 파일에 주민 <b class="num">${d.villagers.length}</b>명, 사진 <b class="num">${Object.keys(d.photos||{}).length}</b>장이 있어요. 불러오면 지금 기록이 이 내용으로 바뀌어요.</div>
+    <div class="actions"><button class="btn ghost" id="impNo">취소</button><button class="btn warm" id="impYes">불러오기</button></div></div>`:
+  `<div class="foot-btns"><button class="btn" id="expBtn">백업 파일 저장</button><label class="btn" for="impFile">백업 불러오기</label><input type="file" id="impFile" accept="application/json,.json" class="vh"></div>`}
+  <div class="hint" id="impMsg" role="status"></div>
+  <div class="credit"><button class="linkbtn" id="introAgain">사용 안내 다시 보기</button>
+  <p>이 사이트는 닌텐도와 관련 없는 팬 제작 기록장이에요. 모여봐요 동물의 숲과 주민 이름 등 관련 명칭의 권리는 Nintendo에 있어요.</p>
+  <p>주민 목록 데이터: <a href="https://github.com/Norviah/animal-crossing" target="_blank" rel="noopener">Norviah/animal-crossing</a> (MIT License)</p></div>`;
+  const on=(s,fn)=>{const el=$(s);if(el)el.onclick=fn};
+  on("#expBtn",exportBackup);on("#introAgain",()=>{S.introSeen=false;render();window.scrollTo(0,0)});on("#impYes",applyBackup);on("#impNo",()=>{S.pendingImport=null;renderFoot()});
+  const fi=$("#impFile");if(fi)fi.onchange=()=>{if(fi.files[0])readBackup(fi.files[0])};
+}
+
+/* ---------- render ---------- */
+const SP_SPECIAL={"개미핥기":'<span class="spi ant"></span>',"타조":'<span class="spi ost"></span>'};
+function avatar(v){const h=HUE[v.personality]??100;const p=v.photos&&v.photos[0];const sp=v.species||(DEXMAP.get(v.name)||{}).species;const ic=SP_ICON[sp],sx=SP_SPECIAL[sp];
+  return `<span class="avatar ${ic?"ic":""}" style="--h:${h}" aria-hidden="true">${sx||ic||esc((v.name||"?").slice(0,1))}${p?imgTag(p,'loading="lazy"'):""}</span>`}
+function routeChip(v){const r=route(v);return r?`<span class="chip route" style="--rh:${RHUE[r]??60}">${esc(r)}</span>`:""}
+
+function render(){
+  const now=S.villagers.filter(isNow).sort((a,b)=>inKey(a).localeCompare(inKey(b)));
+  const gone=S.villagers.filter(v=>!isNow(v)).sort((a,b)=>outKey(b).localeCompare(outKey(a)));
+  // island
+  const nm=S.island&&S.island.name;
+  if(S.editIsland){
+    $("#islandBox").innerHTML=`<form class="island-form" id="islandForm"><div class="f"><label for="islandName">섬 이름</label><input id="islandName" maxlength="20" value="${esc(nm||"")}" placeholder="예: 달빛섬"></div><button class="btn pri" type="submit">저장</button><button class="btn ghost" type="button" id="islandCancel">취소</button></form>`;
+    $("#islandForm").onsubmit=async e=>{e.preventDefault();const v=$("#islandName").value.trim();S.editIsland=false;try{await putIsland(v)}catch(err){writeFailed(err)}render()};
+    $("#islandCancel").onclick=()=>{S.editIsland=false;render()};
+  }else{
+    $("#islandBox").innerHTML=`<h1>${nm?`<span>${esc(nm)}</span> 주민 등록부`:"우리 섬 주민 등록부"}</h1>${S.canWrite?`<button class="island-edit" id="islandEdit">${nm?"섬 이름 바꾸기":"섬 이름 정하기"}</button>`:""}`;
+    const b=$("#islandEdit");if(b)b.onclick=()=>{S.editIsland=true;render();$("#islandName").focus()};
+  }
+  // stats
+  const st=(l,n,cls="",extra="")=>`<div class="stat ${cls}"><span class="sl">${l}</span><b class="num">${n}${extra}</b></div>`;
+  $("#stats").innerHTML=st("사는 주민",now.length,now.length>=MAX?"main full":"main",`<small>/${MAX}</small>`)+st("떠난 주민",gone.length)+st("다녀간 주민",S.villagers.length)+st("지박령",now.filter(v=>v.forever).length)+st("사진 받음",new Set(S.villagers.filter(v=>v.gotPhoto).map(v=>v.name)).size);
+  // birthdays
+  const td=todayStr(),[ty,tm,tdd]=td.split("-").map(Number);
+  const up=now.filter(v=>v.birthday).map(v=>{const[m,d]=v.birthday.split("-").map(Number);let y=ty;let diff=(Date.UTC(y,m-1,d)-Date.UTC(ty,tm-1,tdd))/864e5;if(diff<0){diff=(Date.UTC(y+1,m-1,d)-Date.UTC(ty,tm-1,tdd))/864e5}return{v,diff}}).sort((a,b)=>a.diff-b.diff);
+  $("#bday").innerHTML=up.length?(up[0].diff===0?`오늘은 <strong>${esc(up[0].v.name)}</strong>의 생일이에요.`:`다음 생일: <strong>${esc(up[0].v.name)}</strong> · ${fmtBday(up[0].v.birthday)} (D-${up[0].diff})`):"";
+  // banner
+  const exN=S.villagers.filter(v=>v.example).length;
+  let ban="";
+  if(exN&&S.canWrite)ban+=`<div class="banner"><span>둘러보기용 예시 기록 ${exN}개가 들어 있어요. 내 주민을 기록하기 전에 지워 주세요.</span><button id="clearEx">예시 지우기</button></div>`;
+  if(!S.introSeen)ban+=`<section class="intro" aria-label="사용 안내"><h2>처음 오셨나요?</h2><ul>
+    <li><b>내 기록은 이 기기에만 저장돼요.</b> 같은 주소를 쓰는 다른 사람과 기록이 섞이지 않고, 로그인도 필요 없어요. 휴대폰과 PC를 같이 쓰려면 백업 파일로 옮기면 돼요.</li>
+    <li><b>가운데 + 버튼으로 주민을 등록해요.</b> 이름을 두세 글자만 치면 종족, 성격, 생일이 자동으로 채워져요.</li>
+    <li><b>날짜가 기억나지 않아도 괜찮아요.</b> “몇 월쯤”이나 “기억 안 나요”로 기록할 수 있어요.</li>
+    <li><b>가끔 맨 아래에서 백업 파일을 저장해 두세요.</b> 휴대폰을 바꾸거나 브라우저 데이터를 지워도 되살릴 수 있어요.</li>
+    <li><b>홈 화면에 추가하면 앱처럼 쓸 수 있어요.</b> 크롬은 메뉴 → 홈 화면에 추가, 사파리는 공유 → 홈 화면에 추가예요.</li>
+  </ul><button class="btn pri" id="introOk">시작하기</button></section>`;
+  if(!S.idbOk)ban+=`<div class="banner"><span>이 브라우저에서는 기록을 저장할 수 없어요. 사생활 보호(시크릿) 모드라면 일반 창에서 열어 주세요.</span></div>`;
+  else if(S.villagers.length&&!S.lastBackup)ban+=`<div class="banner"><span>기록은 이 휴대폰에만 저장돼요. 맨 아래에서 백업 파일을 한 번 저장해 두세요.</span></div>`;
+  if(!S.canWrite)ban+=`<div class="banner"><span>보기 전용으로 열려 있어요.</span></div>`;
+  $("#banner").innerHTML=ban;
+  const io=$("#introOk");if(io)io.onclick=async()=>{S.introSeen=true;try{await IDB.put("kv","introSeen",true)}catch(e){}render()};
+  const ce=$("#clearEx");if(ce)ce.onclick=async()=>{ce.disabled=true;for(const v of S.villagers.filter(x=>x.example)){try{await delVillager(v.id)}catch(e){}}};
+  // tabs
+  document.querySelectorAll(".tab").forEach(t=>{t.setAttribute("aria-selected",t.dataset.tab===S.tab)});
+  $("#fab").hidden=!S.canWrite;
+  renderFoot();
+  // view
+  const view=$("#view");
+  if(S.tab==="now")view.innerHTML=now.length?listHTML(now,"now"):emptyHTML("아직 등록된 주민이 없어요","섬에 사는 주민을 한 명씩 입주일과 함께 등록해 보세요. 입주한 지 며칠째인지 자동으로 세어 드려요.");
+  else if(S.tab==="gone"){const miss=gone.filter(v=>!v.gotPhoto);if(!miss.length)S.goneNoPic=false;
+    view.innerHTML=gone.length?(miss.length?`<div class="miss"><span>사진을 못 받고 떠난 주민 <b class="num">${miss.length}</b>명</span><button id="missBtn" aria-pressed="${!!S.goneNoPic}">${S.goneNoPic?"모두 보기":"이 주민만 보기"}</button></div>`:"")+listHTML(S.goneNoPic?miss:gone,"gone"):emptyHTML("떠난 주민이 없어요","주민 카드를 눌러 ‘이사 갔어요’를 기록하면 여기로 옮겨져요. 함께 산 기간과 이사 이유가 남아요.");}
+  else if(S.tab==="timeline"){view.innerHTML=routesHTML()+timelineHTML();const tl=view.querySelector(".tl");if(tl)tl.scrollLeft=tl.scrollWidth}
+  else{renderDex();return}
+  view.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDetail(b.dataset.open));
+  const mb=$("#missBtn");if(mb)mb.onclick=()=>{S.goneNoPic=!S.goneNoPic;render()};
+  const ss=$("#sortSel");if(ss)ss.onchange=()=>{S.sort[S.tab]=ss.value;try{localStorage.setItem("acnh-sort",JSON.stringify(S.sort))}catch(e){}render()};
+  const eb=view.querySelector("[data-add]");if(eb)eb.onclick=()=>openForm();
+}
+const SORTS={now:[["","입주일순"],["name","이름순"],["stay","거주 기간 긴 순"],["forever","지박령 먼저"],["fav","최애 먼저"],["species","종족별"],["personality","성격별"]],
+  gone:[["","최근 이사순"],["name","이름순"],["stay","함께한 기간 긴 순"],["fav","최애 먼저"],["species","종족별"],["personality","성격별"]]};
+function listHTML(list,tab){
+  const k=SORTS[tab].some(o=>o[0]===S.sort[tab])?S.sort[tab]:"";
+  const byName=(a,b)=>a.name.localeCompare(b.name,"ko");
+  const base=list.slice(),pos=new Map(base.map((v,i)=>[v.id,i])),keep=(a,b)=>pos.get(a.id)-pos.get(b.id);
+  let arr=base,groups=null;
+  if(k==="name")arr=base.sort(byName);
+  else if(k==="stay")arr=base.sort((a,b)=>{const x=stayDays(a),y=stayDays(b);return (y??-1)-(x??-1)||keep(a,b)});
+  else if(k==="forever")arr=base.sort((a,b)=>(b.forever?1:0)-(a.forever?1:0)||keep(a,b));
+  else if(k==="fav")arr=base.sort((a,b)=>(b.favorite?1:0)-(a.favorite?1:0)||keep(a,b));
+  else if(k==="species"||k==="personality"){
+    const order=k==="personality"?PERS:[...new Set(base.map(v=>v.species).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ko"));
+    const m=new Map();base.forEach(v=>{const g=v[k]||"";if(!m.has(g))m.set(g,[]);m.get(g).push(v)});
+    groups=[...order.filter(g=>m.has(g)),...[...m.keys()].filter(g=>g&&!order.includes(g)),...(m.has("")?[""]:[])].map(g=>[g||(k==="species"?"종족 미입력":"성격 미입력"),m.get(g).sort(byName)]);
+  }
+  const bar=`<div class="toolbar"><span class="vt">${tab==="now"?"지금 사는 주민":"떠난 주민"} <span class="num">${list.length}</span>명</span><span class="sr"><label for="sortSel">정렬</label><select id="sortSel">${SORTS[tab].map(([v,l])=>`<option value="${v}" ${v===k?"selected":""}>${l}</option>`).join("")}</select></span></div>`;
+  if(groups)return bar+groups.map(([g,vs])=>`<h3 class="grp">${esc(g)} <span class="num">${vs.length}</span></h3><div class="grid">${vs.map(card).join("")}</div>`).join("");
+  return bar+`<div class="grid">${arr.map(card).join("")}</div>`;
+}
+function routesHTML(){
+  const list=S.villagers.filter(v=>route(v));if(!list.length)return "";
+  const c={};list.forEach(v=>{const r=route(v);c[r]=(c[r]||0)+1});
+  const ent=ARRIVE.filter(r=>c[r]).map(r=>[r,c[r]]).concat(Object.keys(c).filter(r=>!ARRIVE.includes(r)).map(r=>[r,c[r]]));
+  return `<section class="routes"><h3>이사 경로</h3><div class="rbar">${ent.map(([r,n])=>`<span style="--rh:${RHUE[r]??60};width:${n/list.length*100}%" title="${esc(r)} ${n}명"></span>`).join("")}</div>
+  <div class="rleg">${ent.map(([r,n])=>`<span style="--rh:${RHUE[r]??60}"><i></i>${esc(r)} <b class="num">${n}</b>명</span>`).join("")}</div></section>`;
+}
+
+/* ---------- dex ---------- */
+function statusOf(name){const rs=S.villagers.filter(v=>v.name===name);if(!rs.length)return null;const cur=rs.find(isNow);return cur?{st:"now",v:cur}:{st:"left",v:rs.sort((a,b)=>outKey(b).localeCompare(outKey(a)))[0]}}
+function renderDex(){
+  const d=S.dex,view=$("#view");
+  const sps=[...new Set(DEX.map(r=>r[1]))].sort((a,b)=>a.localeCompare(b,"ko"));
+  view.innerHTML=`<div class="dex-top"><div class="dex-count" id="dexCount"></div><div class="meter"><span id="dexMeter"></span></div>
+  <div class="filters"><input class="q" id="dq" type="search" placeholder="이름이나 말버릇으로 찾기" value="${esc(d.q)}" aria-label="주민 찾기">
+  <select id="dsp" aria-label="종족">${opts(sps,d.sp,"모든 종족")}</select>
+  <select id="dpe" aria-label="성격">${opts(PERS,d.pe,"모든 성격")}</select>
+  <select id="dst" aria-label="만남 여부"><option value="">전체</option><option value="met" ${d.st==="met"?"selected":""}>만난 주민</option><option value="now" ${d.st==="now"?"selected":""}>지금 사는 주민</option><option value="no" ${d.st==="no"?"selected":""}>아직 못 만난 주민</option><option value="forever" ${d.st==="forever"?"selected":""}>지박령 확정 주민</option><option value="pic" ${d.st==="pic"?"selected":""}>사진 받은 주민</option><option value="nopic" ${d.st==="nopic"?"selected":""}>만났지만 사진은 아직</option><option value="leftnopic" ${d.st==="leftnopic"?"selected":""}>떠났는데 사진 못 받음</option></select></div></div>
+  <div class="dex" id="dexList"></div>`;
+  const upd=()=>{d.q=$("#dq").value.trim();d.sp=$("#dsp").value;d.pe=$("#dpe").value;d.st=$("#dst").value;renderDexList()};
+  $("#dq").addEventListener("input",upd);["#dsp","#dpe","#dst"].forEach(s=>$(s).addEventListener("change",upd));
+  renderDexList();
+}
+function renderDexList(){
+  const d=S.dex,met=new Set(S.villagers.map(v=>v.name).filter(n=>DEXMAP.has(n)));
+  $("#dexCount").innerHTML=`전체 <span class="num">${DEX.length}</span>명 중 <b class="num">${met.size}</b>명을 만났어요`;
+  $("#dexMeter").style.width=(met.size/DEX.length*100)+"%";
+  const rows=DEX.filter(r=>{if(d.q&&!(r[0].includes(d.q)||r[5].includes(d.q)))return false;if(d.sp&&r[1]!==d.sp)return false;if(d.pe&&r[2]!==d.pe)return false;
+    if(d.st){const s=statusOf(r[0]);if(d.st==="met"&&!s)return false;if(d.st==="now"&&(!s||s.st!=="now"))return false;if(d.st==="no"&&s)return false;
+    const pic=S.villagers.some(v=>v.name===r[0]&&v.gotPhoto);if(d.st==="pic"&&!pic)return false;if(d.st==="forever"&&!(s&&s.st==="now"&&s.v.forever))return false;if(d.st==="nopic"&&(!s||pic))return false;if(d.st==="leftnopic"&&(!s||s.st!=="left"||pic))return false}return true});
+  const el=$("#dexList");
+  el.innerHTML=rows.length?rows.map(r=>{const s=statusOf(r[0]);const v=s?s.v:{name:r[0],personality:r[2]};
+    return `<button class="dx ${s?(s.st==="now"?"met":"left"):""}" data-dex="${esc(r[0])}">${avatar(v)}<span class="t"><b>${esc(r[0])}</b><small>${esc(r[1])} · ${esc(r[2])}${s?(s.st==="now"?" · 사는 중":" · 떠남"):""}${S.villagers.some(v=>v.name===r[0]&&v.gotPhoto)?" · 사진":""}</small></span></button>`}).join("")
+    :`<div class="empty" style="grid-column:1/-1">조건에 맞는 주민이 없어요.</div>`;
+  el.querySelectorAll("[data-dex]").forEach(b=>b.onclick=()=>{const s=statusOf(b.dataset.dex);if(s)openDetail(s.v.id);else if(S.canWrite)openForm(null,b.dataset.dex)});
+}
+function emptyHTML(t,s){return `<div class="empty"><div class="disp">${t}</div><div>${s}</div>${S.canWrite?`<button class="btn pri" data-add>+ 새 주민 입주</button>`:""}</div>`}
+function card(v){
+  const n=stayDays(v),gone=!isNow(v);
+  return `<button class="card ${gone?"gone":""}" data-open="${esc(v.id)}">${avatar(v)}<span class="cbody">
+    <span class="cname"><h3>${esc(v.name)}</h3>${v.forever&&isNow(v)?`<span class="chip stay-mark">지박령</span>`:""}${v.favorite?`<span class="chip fav">최애</span>`:""}${v.gotPhoto?`<span class="chip pic">사진 받음</span>`:(!isNow(v)?`<span class="chip nopic">사진 못 받음</span>`:"")}${v.example?`<span class="chip ex">예시</span>`:""}</span>
+    <span class="meta">${[v.species,v.personality].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</span>
+    <span class="days num">${gone?(n==null?"함께한 기간 모름":`함께한 ${stayText(n,approx(v))}`):nowText(v,n)}</span>
+    <span class="meta num" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${gone?`${fmtShort(v.moveIn,v.inPrec)} – ${fmtShort(v.moveOut,v.outPrec)}`:(v.moveIn?`${fmtShort(v.moveIn,v.inPrec)} 입주`:"입주일 모름")}${routeChip(v)}</span>
+  </span></button>`;
+}
+function timelineHTML(){
+  const list=S.villagers.filter(v=>v.moveIn&&(isNow(v)||v.moveOut)).sort((a,b)=>a.moveIn.localeCompare(b.moveIn));
+  const skip=S.villagers.length-list.length;
+  if(!list.length&&skip)return `<div class="empty">날짜를 기록한 주민이 아직 없어요. 입주일이나 이사 간 날을 대략이라도 적으면 타임라인에 나타나요.</div>`;
+  if(!list.length)return emptyHTML("타임라인이 비어 있어요","주민을 등록하면 누가 언제부터 언제까지 섬에 살았는지 막대로 한눈에 보여 드려요.");
+  const end=todayStr();
+  let start=list[0].moveIn;
+  const [sy,sm]=start.split("-").map(Number);start=`${sy}-${String(sm).padStart(2,"0")}-01`;
+  const total=Math.max(30,daysBetween(start,end)+10);
+  const avail=Math.max(200,(document.querySelector("#view").clientWidth||330)-2-92-6);
+  const ppd=Math.max(avail/total,0.45);
+  const W=Math.ceil(total*ppd);
+  // month ticks
+  let ticks="",[y,m]=[sy,sm],step=Math.max(1,Math.ceil(62/(30.4*ppd))),i=0,lastY=null;
+  while(true){const s=`${y}-${String(m).padStart(2,"0")}-01`;const off=daysBetween(start,s);if(off>total)break;
+    if(i%step===0&&off*ppd<W-44)ticks+=`<span class="tick num" style="left:${off*ppd}px">${y!==lastY?`${String(y).slice(2)}년 `:""}${m}월</span>`,lastY=y;
+    i++;m++;if(m>12){m=1;y++}}
+  const rows=list.map(v=>{const a=daysBetween(start,v.moveIn),b=daysBetween(start,v.moveOut||end);
+    return `<div class="tl-row"><div class="tl-name" title="${esc(v.name)}">${esc(v.name)}</div><div class="tl-track" style="width:${W}px"><button class="bar ${isNow(v)?"now":"gone"}" data-open="${esc(v.id)}" style="left:${a*ppd}px;width:${Math.max(6,(b-a)*ppd)}px" aria-label="${esc(v.name)} ${fmtDate(v.moveIn,v.inPrec)}부터 ${v.moveOut?fmtDate(v.moveOut,v.outPrec)+"까지":"지금까지"}"></button></div></div>`}).join("");
+  return `<div class="tl"><div class="tl-inner" style="width:${W+92}px"><div class="tl-head" style="width:${W}px">${ticks}</div>${rows}</div></div>
+  <div class="legend"><span><i style="background:var(--leaf)"></i>지금 사는 주민</span><span><i style="background:var(--gone)"></i>떠난 주민</span><span>막대를 누르면 기록을 볼 수 있어요</span>${skip?`<span>날짜를 모르는 주민 ${skip}명은 빠져 있어요</span>`:""}</div>`;
+}
+
+/* ---------- sheets ---------- */
+let sheetState=null;
+function closeSheet(){sheetState=null;$("#sheetRoot").innerHTML=""}
+function showSheet(html){
+  $("#sheetRoot").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  $("#scrim").addEventListener("click",e=>{if(e.target.id==="scrim")closeSheet()});
+  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeSheet);
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sheetState)closeSheet()});
+function refreshSheet(){if(sheetState&&sheetState.type==="detail"){const v=S.villagers.find(x=>x.id===sheetState.id);if(!v)closeSheet();}}
+
+function opts(list,sel,blank){return (blank?`<option value="">${blank}</option>`:"")+list.map(o=>`<option ${o===sel?"selected":""}>${esc(o)}</option>`).join("")}
+function openForm(id,prefillName){
+  const v=id?S.villagers.find(x=>x.id===id):null;
+  const f=v||(prefillName&&DEXMAP.get(prefillName))||null;
+  sheetState={type:"form",id};
+  const [bm,bd]=(f&&f.birthday?f.birthday.split("-"):["",""]).map(x=>x?String(Number(x)):"");
+  const months=Array.from({length:12},(_,i)=>String(i+1)),days=Array.from({length:31},(_,i)=>String(i+1));
+  const arr=v?route(v):"";
+  showSheet(`<div class="sheet-head"><h2>${v?"기록 고치기":"새 주민 입주"}</h2><button class="x" data-close aria-label="닫기">×</button></div>
+  <form id="vf" class="fields" novalidate>
+    <div class="f wide suggest"><label for="fName">이름 *</label><input id="fName" maxlength="20" required autocomplete="off" value="${esc(f?.name||"")}" placeholder="이름을 치면 주민 목록에서 찾아 드려요" role="combobox" aria-autocomplete="list" aria-controls="sugList" aria-expanded="false"><ul class="sug-list" id="sugList" role="listbox" hidden></ul></div>
+    <div class="f"><label for="fSpecies">종족</label><input id="fSpecies" list="speciesList" maxlength="10" value="${esc(f?.species||"")}" placeholder="예: 고양이"><datalist id="speciesList">${SPECIES.map(s=>`<option value="${s}">`).join("")}</datalist></div>
+    <div class="f"><label for="fPers">성격</label><select id="fPers">${opts(PERS,f?.personality,"선택 안 함")}</select></div>
+    <div class="f"><label for="fBm">생일</label><div class="row2"><select id="fBm" aria-label="생일 월">${opts(months,bm,"월")}</select><select id="fBd" aria-label="생일 일">${opts(days,bd,"일")}</select></div></div>
+    ${datePick("fIn","입주일",v?v.moveIn:todayStr(),v?.inPrec)}
+    <div class="f"><label for="fHow">이사 경로</label><select id="fHow">${opts(ARRIVE.includes(arr)||!arr?ARRIVE:[...ARRIVE,arr],arr,"선택 안 함")}</select></div>
+    ${v&&!isNow(v)?`${datePick("fOut","이사 간 날",v.moveOut,v.outPrec||(v.moveOut?"day":"unknown"))}
+    <div class="f"><label for="fWhy">이사 이유</label><select id="fWhy">${opts(LEAVE,v.leaveReason,"선택 안 함")}</select></div>
+    <div class="f wide"><label for="fBye">마지막 인사</label><textarea id="fBye" maxlength="500">${esc(v.farewell||"")}</textarea></div>`:""}
+    <div class="f wide"><label for="fNote">메모</label><textarea id="fNote" maxlength="1000" placeholder="자유롭게 적어 주세요">${esc(v?.note||"")}</textarea></div>
+    <div class="f wide checkrow"><label><input type="checkbox" id="fFav" ${v?.favorite?"checked":""}> 최애 주민으로 표시</label>
+      <label><input type="checkbox" id="fForever" ${v?.forever?"checked":""}> 섬 지박령 확정</label>
+      <label><input type="checkbox" id="fPic" ${v?.gotPhoto?"checked":""}> 주민 사진을 받았어요</label></div>
+    <div class="err f wide" id="fErr" role="alert"></div>
+    <div class="actions f wide"><button type="button" class="btn ghost" data-close>취소</button><button class="btn pri" type="submit">${v?"저장":"입주 등록"}</button></div>
+  </form>`);
+  wireNameSuggest();wireDate("fIn");if($("#fOutP"))wireDate("fOut");
+  if(!f)$("#fName").focus();
+  $("#vf").onsubmit=async e=>{
+    e.preventDefault();
+    const name=$("#fName").value.trim(),di=readDate("fIn"),moveIn=di.date;
+    if(!name){$("#fErr").textContent="주민 이름을 적어 주세요.";return}
+    if(di.err){$("#fErr").textContent="입주일을 고르거나 ‘기억 안 나요’를 선택해 주세요.";return}
+    const bmv=$("#fBm").value,bdv=$("#fBd").value;
+    const rec={...(v||{}),id:v?.id||newId(),name,species:$("#fSpecies").value.trim(),personality:$("#fPers").value,birthday:bmv&&bdv?`${bmv.padStart(2,"0")}-${bdv.padStart(2,"0")}`:"",moveIn,inPrec:di.prec,arrival:$("#fHow").value,note:$("#fNote").value.trim(),favorite:$("#fFav").checked,forever:$("#fForever").checked,gotPhoto:$("#fPic").checked,entries:v?.entries||[],photos:v?.photos||[],moveOut:v?.moveOut||null,createdAt:v?.createdAt||new Date().toISOString()};
+    if(v&&!isNow(v)){const dout=readDate("fOut");if(dout.err){$("#fErr").textContent="이사 간 날을 고르거나 ‘기억 안 나요’를 선택해 주세요.";return}
+      if(dout.date&&moveIn&&dout.date.slice(0,dout.prec==="month"?7:10)<moveIn.slice(0,dout.prec==="month"?7:10)){$("#fErr").textContent="이사 간 날이 입주일보다 빨라요.";return}
+      rec.moveOut=dout.date;rec.outPrec=dout.prec;rec.left=true;rec.leaveReason=$("#fWhy").value;rec.farewell=$("#fBye").value.trim()}
+    delete rec.example;
+    try{await putVillager(rec);if(!v){S.tab="now";render()}openDetail(rec.id)}catch(err){$("#fErr").textContent=writeFailed(err)}
+  };
+}
+
+function wireNameSuggest(){
+  const inp=$("#fName"),ul=$("#sugList");let items=[],on=-1;
+  const close=()=>{ul.hidden=true;inp.setAttribute("aria-expanded","false");on=-1};
+  const pick=r=>{inp.value=r.name;$("#fSpecies").value=r.species;$("#fPers").value=r.personality;
+    const[m,d]=r.birthday.split("-");$("#fBm").value=String(Number(m));$("#fBd").value=String(Number(d));close()};
+  const draw=()=>{ul.innerHTML=items.map((r,i)=>`<li><button type="button" role="option" class="${i===on?"on":""}" data-i="${i}"><span>${esc(r.name)}</span><small>${esc(r.species)} · ${esc(r.personality)}</small></button></li>`).join("");
+    ul.querySelectorAll("button").forEach(b=>b.onmousedown=e=>{e.preventDefault();pick(items[+b.dataset.i])})};
+  inp.addEventListener("input",()=>{const q=inp.value.trim();if(!q){close();return}
+    const a=[],b=[];for(const r of DEXMAP.values()){if(r.name.startsWith(q))a.push(r);else if(r.name.includes(q))b.push(r)}
+    items=a.concat(b).slice(0,8);on=-1;if(!items.length||(items.length===1&&items[0].name===q&&$("#fSpecies").value)){close();return}
+    ul.hidden=false;inp.setAttribute("aria-expanded","true");draw()});
+  inp.addEventListener("keydown",e=>{if(ul.hidden)return;
+    if(e.key==="ArrowDown"){e.preventDefault();on=Math.min(items.length-1,on+1);draw()}
+    else if(e.key==="ArrowUp"){e.preventDefault();on=Math.max(0,on-1);draw()}
+    else if(e.key==="Enter"&&on>=0){e.preventDefault();pick(items[on])}
+    else if(e.key==="Escape"){e.stopPropagation();close()}});
+  inp.addEventListener("blur",()=>{setTimeout(close,120);const r=DEXMAP.get(inp.value.trim());if(r&&!$("#fSpecies").value)pick(r)});
+}
+
+/* ---------- photos ---------- */
+function loadImage(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{res(im);setTimeout(()=>URL.revokeObjectURL(u),1000)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("decode"))};im.src=u})}
+function drawTo(im,M){const k=Math.min(1,M/Math.max(im.naturalWidth,im.naturalHeight));
+  const c=document.createElement("canvas");c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
+  c.getContext("2d").drawImage(im,0,0,c.width,c.height);return c}
+async function shrink(im){const c=drawTo(im,1400);return await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error("encode")),"image/jpeg",.85))}
+function smallDataURL(im){for(const [M,q] of [[1000,.75],[800,.7],[640,.65],[480,.6]]){const u=drawTo(im,M).toDataURL("image/jpeg",q);if(u.length<200000)return u}throw new Error("too big")}
+async function savePhoto(file){
+  const im=await loadImage(file),blob=await shrink(im),id=newId();
+  await IDB.put("photos",id,blob);S.photoURLs.set(id,URL.createObjectURL(blob));
+  return {id,kind:"local",date:todayStr()};
+}
+async function dropPhoto(id){try{await IDB.del("photos",id)}catch(e){}const u=S.photoURLs.get(id);if(u)URL.revokeObjectURL(u);S.photoURLs.delete(id)}
+async function addPhotos(id,files,msgEl){
+  const done=[];let fail=0;
+  for(let i=0;i<files.length;i++){
+    msgEl.textContent=`사진 올리는 중… ${i+1}/${files.length}`;
+    try{done.push(await savePhoto(files[i]))}catch(e){fail++;console.warn("photo",e)}
+  }
+  if(done.length){const v=S.villagers.find(x=>x.id===id);if(v){try{await putVillager({...v,photos:[...(v.photos||[]),...done]})}catch(e){msgEl.textContent=writeFailed(e);return}}}
+  openDetail(id);
+  if(fail){const m=$("#dErr");if(m)m.textContent=`사진 ${fail}장을 올리지 못했어요. 사진 파일(JPG, PNG)인지 확인해 주세요.`}
+}
+
+function photosHTML(v,W){
+  const ps=v.photos||[],canAdd=W&&S.idbOk;
+  if(!ps.length&&!canAdd)return S.mode==="local"&&W?`<div class="sec"><h3>사진</h3><div class="hint">이 화면에서는 사진을 올릴 수 없어요. 등록부 링크를 Claude 앱이나 claude.ai에서 열면 사진을 넣을 수 있어요.</div></div>`:"";
+  return `<div class="sec"><h3>사진 <span class="hint num">${ps.length?ps.length+"장":""}</span></h3><div class="photos">
+  ${ps.map((p,i)=>`<button class="ph" data-ph="${i}" aria-label="사진 ${i+1} 크게 보기">${imgTag(p,'loading="lazy"')}${i===0?`<span class="cov">대표</span>`:""}</button>`).join("")}
+  ${canAdd?`<label class="ph-add" id="phDrop">${FINE?"+ 사진 추가<br><small>또는 끌어다 놓기</small>":"+ 사진 추가"}<input type="file" id="phFile" accept="image/*" multiple></label>`:""}</div>
+  ${canAdd?`<textarea class="paste" id="phPaste" rows="1" placeholder="${FINE?"복사한 사진을 여기에 붙여넣기 (Ctrl+V)":"복사한 사진은 여기를 길게 눌러 붙여넣기"}" aria-label="사진 붙여넣기"></textarea>`:""}
+  ${canAdd?`<div class="hint" id="phMsg">${ps.length?"":"게임 스크린샷을 올려 보세요. 첫 사진이 대표 사진이 돼요."}</div>`:""}</div>`;
+}
+function openPhoto(v,i,askDel){
+  const ps=v.photos||[],p=ps[i];if(!p)return openDetail(v.id);
+  sheetState={type:"detail",id:v.id};
+  const W=S.canWrite&&S.idbOk;
+  showSheet(`<div class="sheet-head"><h2>${esc(v.name)}의 사진 <span class="hint num">${i+1}/${ps.length}</span></h2><button class="x" data-close aria-label="닫기">×</button></div>
+  ${imgTag(p,'class="big-photo"')}
+  <div class="hint num">${p.date?fmtDate(p.date)+"에 올림":""}</div>
+  <div class="err" id="pErr" role="alert"></div>
+  <div class="actions">
+    <button class="btn ghost" id="pBack">← 기록으로</button>
+    ${ps.length>1?`<button class="btn" id="pPrev" ${i===0?"disabled":""}>이전</button><button class="btn" id="pNext" ${i===ps.length-1?"disabled":""}>다음</button>`:""}
+    ${W&&i>0&&!askDel?`<button class="btn" id="pCover">대표 사진으로</button>`:""}
+    ${W?(askDel?`<span style="align-self:center;font-size:14px">이 사진을 지울까요?</span><button class="btn ghost" id="pNo">그대로 두기</button><button class="btn danger" id="pYes">지우기</button>`:`<button class="btn danger" id="pDel">사진 지우기</button>`):""}
+  </div>`);
+  const on=(s,f)=>{const el=$(s);if(el)el.onclick=f};
+  on("#pBack",()=>openDetail(v.id));
+  on("#pPrev",()=>openPhoto(v,i-1));on("#pNext",()=>openPhoto(v,i+1));
+  on("#pDel",()=>openPhoto(v,i,true));on("#pNo",()=>openPhoto(v,i));
+  on("#pCover",async()=>{const cur=S.villagers.find(x=>x.id===v.id)||v;const a=[...(cur.photos||[])];const [x]=a.splice(i,1);a.unshift(x);
+    try{await putVillager({...cur,photos:a});openDetail(v.id)}catch(e){$("#pErr").textContent=writeFailed(e)}});
+  on("#pYes",async()=>{const cur=S.villagers.find(x=>x.id===v.id)||v;const a=(cur.photos||[]).filter(x=>x.id!==p.id);
+    try{await putVillager({...cur,photos:a});await dropPhoto(p.id);openDetail(v.id)}catch(e){$("#pErr").textContent=writeFailed(e)}});
+}
+
+function openDetail(id,sub){
+  const v=S.villagers.find(x=>x.id===id);if(!v)return;
+  sheetState={type:"detail",id};
+  if(sub&&sub.startsWith("photo:"))return openPhoto(v,+sub.split(":")[1],sub.endsWith(":del"));
+  const n=stayDays(v),gone=!isNow(v),R=route(v),dx=DEXMAP.get(v.name);
+  const entries=[...(v.entries||[])].map((e,i)=>({...e,i})).sort((a,b)=>a.date.localeCompare(b.date));
+  const log=[{date:v.moveIn,p:v.inPrec,text:`입주${R?` · ${R}`:""}`,cls:"in"},...entries.map(e=>({...e,cls:""})),...(gone?[{date:v.moveOut,p:v.outPrec,text:`이사${v.leaveReason?` · ${v.leaveReason}`:""}`,cls:"out"}]:[])];
+  const W=S.canWrite;
+  showSheet(`<div class="sheet-head"><div class="id-top">${avatar(v)}<div><h2>${esc(v.name)}</h2><div class="meta">${[v.species,v.personality,v.birthday?`생일 ${fmtBday(v.birthday)}`:""].filter(Boolean).map(esc).join(" · ")}</div></div></div><button class="x" data-close aria-label="닫기">×</button></div>
+  <div class="stay ${gone?"gone":""}"><span class="big num">${gone?stayText(n,approx(v)):(n==null?"기간 모름":n>=1?`${approx(v)?"약 ":""}${n}일째`:stayText(n))}</span><span class="meta">${gone?"함께 산 기간":"우리 섬에서 사는 중"}</span>${v.example?`<span class="chip ex">예시</span>`:""}</div>
+  <dl class="dl"><dt>입주</dt><dd class="num">${fmtDate(v.moveIn,v.inPrec)}</dd>
+  ${R?`<dt>이사 경로</dt><dd>${routeChip(v)}</dd>`:""}
+  ${!gone?`<dt>지박령</dt><dd>${v.forever?`확정이에요. 이사 상담은 무조건 거절!${W?`<button class="quick" id="foreverBtn">취소</button>`:""}`:`아직이에요${W?`<button class="quick" id="foreverBtn">확정하기</button>`:""}`}</dd>`:""}
+  <dt>주민 사진</dt><dd class="num">${v.gotPhoto?`받았어요`:`아직 못 받았어요${W?`<button class="quick" id="picBtn">받았어요</button>`:""}`}</dd>
+  ${dx&&dx.catch?`<dt>말버릇</dt><dd>“${esc(dx.catch)}”</dd>`:""}
+  ${gone?`<dt>이사</dt><dd class="num">${fmtDate(v.moveOut,v.outPrec)}${v.leaveReason?` · ${esc(v.leaveReason)}`:""}</dd>`:""}</dl>
+  ${photosHTML(v,W)}
+  ${v.note?`<div class="sec"><h3>메모</h3><div class="note">${esc(v.note)}</div></div>`:""}
+  ${gone&&v.farewell?`<div class="sec"><h3>마지막 인사</h3><div class="note">${esc(v.farewell)}</div></div>`:""}
+  <div class="sec"><h3>함께한 날들</h3><ul class="diary">${log.map(e=>`<li class="${e.cls}"><div class="d num">${fmtDate(e.date,e.p)}${e.i!==undefined&&W?` <button class="rm" data-rm="${e.i}">지우기</button>`:""}</div><div class="t">${esc(e.text)}</div></li>`).join("")}</ul>
+  ${W?`<form class="add-diary" id="df"><input type="date" id="dDate" value="${todayStr()}" aria-label="날짜"><input type="text" id="dText" maxlength="300" placeholder="선물 받음, 사진 받음, 말버릇 바뀜…" aria-label="기록 내용"><button class="btn" type="submit">기록 추가</button></form>`:""}</div>
+  ${W&&!gone&&sub!=="leave"?`<button class="btn warm" id="leaveBtn">이사 갔어요</button>`:""}
+  ${W&&sub==="leave"?`<form class="panel warm" id="lf"><h3 class="disp" style="font-size:18px">${esc(v.name)}의 이사 기록</h3>
+    <div class="fields">${datePick("lD","이사 간 날",todayStr(),"day")}
+    <div class="f"><label for="lWhy">이사 이유</label><select id="lWhy">${opts(LEAVE,"","선택 안 함")}</select></div>
+    <div class="f wide"><label for="lBye">마지막 인사</label><textarea id="lBye" maxlength="500" placeholder="떠나기 전에 남긴 말, 받은 사진…"></textarea></div></div>
+    <div class="err" id="lErr" role="alert"></div>
+    <div class="actions"><button type="button" class="btn ghost" id="lCancel">취소</button><button class="btn warm" type="submit">이사 기록 저장</button></div></form>`:""}
+  <div class="err" id="dErr" role="alert"></div>
+  ${W?`<div class="actions">${sub==="del"?`<span style="align-self:center;font-size:14px">${esc(v.name)}의 기록을 모두 지울까요?</span><button class="btn ghost" id="delNo">그대로 두기</button><button class="btn danger" id="delYes">지우기</button>`:`<button class="btn danger" id="delAsk">기록 지우기</button><button class="btn" id="editBtn">고치기</button>`}</div>`:""}`);
+  const on=(s,f)=>{const el=$(s);if(el)el.onclick=f};
+  on("#leaveBtn",()=>openDetail(id,"leave"));
+  on("#foreverBtn",async()=>{try{await putVillager({...v,forever:!v.forever});openDetail(id)}catch(e){$("#dErr").textContent=writeFailed(e)}});
+  on("#picBtn",async()=>{try{await putVillager({...v,gotPhoto:true});openDetail(id)}catch(e){$("#dErr").textContent=writeFailed(e)}});
+  document.querySelectorAll("[data-ph]").forEach(b=>b.onclick=()=>openDetail(id,"photo:"+b.dataset.ph));
+  const pf=$("#phFile");if(pf){pf.onchange=()=>{const fs=[...pf.files].slice(0,12);if(fs.length)addPhotos(id,fs,$("#phMsg"))};}
+  const dz=$("#phDrop");if(dz){dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("over")});dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
+    dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");const fs=[...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith("image/"));if(fs.length)addPhotos(id,fs.slice(0,12),$("#phMsg"))})}
+  const pp=$("#phPaste");if(pp)pp.addEventListener("paste",e=>{const fs=[...(e.clipboardData?.files||[])].filter(f=>f.type.startsWith("image/"));e.preventDefault();pp.value="";
+    if(fs.length)addPhotos(id,fs.slice(0,12),$("#phMsg"));else $("#phMsg").textContent="붙여 넣은 내용에 사진이 없어요. 사진을 복사한 뒤 다시 붙여 넣어 주세요."});
+  on("#lCancel",()=>openDetail(id));
+  on("#editBtn",()=>openForm(id));
+  on("#delAsk",()=>openDetail(id,"del"));
+  on("#delNo",()=>openDetail(id));
+  on("#delYes",async()=>{try{await delVillager(id);closeSheet()}catch(e){$("#dErr").textContent=writeFailed(e)}});
+  document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{const es=[...(v.entries||[])];es.splice(Number(b.dataset.rm),1);try{await putVillager({...v,entries:es});openDetail(id)}catch(e){$("#dErr").textContent=writeFailed(e)}});
+  const df=$("#df");if(df)df.onsubmit=async e=>{e.preventDefault();const t=$("#dText").value.trim(),d=$("#dDate").value||todayStr();if(!t){$("#dText").focus();return}
+    try{await putVillager({...v,entries:[...(v.entries||[]),{date:d,text:t}]});openDetail(id)}catch(err){$("#dErr").textContent=writeFailed(err)}};
+  const lf=$("#lf");if(lf){wireDate("lD");$("#lDP").focus();lf.onsubmit=async e=>{e.preventDefault();const r=readDate("lD");if(r.err){$("#lErr").textContent="이사 간 날을 고르거나 ‘기억 안 나요’를 선택해 주세요.";return}
+    const k=r.prec==="month"?7:10;if(r.date&&v.moveIn&&r.date.slice(0,k)<v.moveIn.slice(0,k)){$("#lErr").textContent="이사 간 날이 입주일보다 빨라요.";return}
+    try{await putVillager({...v,moveOut:r.date,outPrec:r.prec,left:true,leaveReason:$("#lWhy").value,farewell:$("#lBye").value.trim()});openDetail(id)}catch(err){$("#lErr").textContent=writeFailed(err)}}}
+}
+
+/* ---------- wiring ---------- */
+$("#tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(!t)return;S.tab=t.dataset.tab;try{localStorage.setItem("acnh-tab",S.tab)}catch(err){}render();window.scrollTo(0,0)});
+$("#fab").onclick=()=>openForm();
+document.addEventListener("keydown",e=>{if(sheetState||e.ctrlKey||e.metaKey||e.altKey)return;const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+  if((e.key==="n"||e.key==="N"||e.key==="ㅜ")&&S.canWrite){e.preventDefault();openForm()}
+  else if(["1","2","3","4"].includes(e.key)){S.tab=["now","gone","timeline","dex"][+e.key-1];try{localStorage.setItem("acnh-tab",S.tab)}catch(err){}render();window.scrollTo(0,0)}});
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{if(S.tab==="timeline"&&S.mode)render()},200)});
+boot();
+</script>
+
+</body>
+</html>
