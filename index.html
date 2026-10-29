@@ -385,6 +385,10 @@ kbd{display:inline-block;min-width:22px;text-align:center;font:600 12px/1 var(--
 .paste{width:100%;border:1px dashed var(--line);background:none;border-radius:10px;padding:9px 11px;font-size:16px;resize:none;height:44px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<!-- 방문 통계(GoatCounter). 쿠키를 쓰지 않고 개인정보를 모으지 않아요.
+     통계 보기: https://dalyeoneo-tools.goatcounter.com -->
+<script data-goatcounter="https://dalyeoneo-tools.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 
@@ -539,6 +543,7 @@ function renderFoot(){
   <div class="credit"><button class="linkbtn" id="introAgain">사용 가이드 보기</button>
   <p class="maker">만든 사람 <b>달연어 (Dal Yeon-eo)</b> · © 2026</p>
   <p>이 사이트는 닌텐도와 관련 없는 팬 제작 기록장이에요. 모여봐요 동물의 숲과 주민 이름 등 관련 명칭의 권리는 Nintendo에 있어요.</p>
+  <p>방문 수만 익명으로 집계해요. 내 주민 기록은 이 기기 밖으로 나가지 않아요.</p>
   <p>주민 목록 데이터: <a href="https://github.com/Norviah/animal-crossing" target="_blank" rel="noopener">Norviah/animal-crossing</a> (MIT License)</p></div>`;
   const on=(s,fn)=>{const el=$(s);if(el)el.onclick=fn};
   on("#expBtn",exportBackup);on("#introAgain",()=>{S.tab="guide";render();window.scrollTo(0,0)});on("#impYes",applyBackup);on("#impNo",()=>{S.pendingImport=null;renderFoot()});
