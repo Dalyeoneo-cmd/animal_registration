@@ -112,19 +112,51 @@ button{cursor:pointer}
 .empty .disp{font-size:16.5px;color:var(--ink)}
 
 /* timeline */
-.tl{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.tl{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tl-inner{position:relative;min-width:100%}
-.tl-head{position:relative;height:28px;border-bottom:1px solid var(--line);margin-left:92px}
-.tick{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);font-size:11px;color:var(--muted);padding:6px 0 0 4px;white-space:nowrap}
-.tl-row{display:flex;align-items:center;height:36px;border-bottom:1px solid var(--line)}
+.tl-head{display:flex;height:46px;border-bottom:1px solid var(--line);position:relative}
+.tl-corner{position:sticky;left:0;z-index:3;flex:none;width:var(--nw);background:var(--paper);border-right:1px solid var(--line)}
+.tl-axis{position:relative;flex:none;height:100%}
+.ty{position:absolute;top:5px;font-size:11.5px;font-weight:600;color:var(--ink);padding-left:5px;white-space:nowrap}
+.tm{position:absolute;bottom:6px;font-size:11px;color:var(--muted);padding-left:5px;white-space:nowrap}
+.tday{position:absolute;top:5px;transform:translateX(-50%);font-size:10.5px;font-weight:600;color:var(--paper);background:var(--sun);border-radius:4px;padding:1px 5px;white-space:nowrap}
+.tl-body{position:relative}
+.tl-grid{position:absolute;top:0;bottom:0;pointer-events:none}
+.gl{position:absolute;top:0;bottom:0;border-left:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.gl.yr{border-left:1.5px solid color-mix(in srgb,var(--muted) 45%,transparent)}
+.gl.today{border-left:2px dashed var(--sun);opacity:.9}
+.tl-group{position:relative;width:100%;height:30px;display:flex;align-items:center;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 70%,var(--paper))}
+.tl-group>span{position:sticky;left:0;padding:0 12px;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.tl-row{position:relative;display:flex;align-items:center;height:48px;border-bottom:1px solid var(--line)}
 .tl-row:last-child{border-bottom:0}
-.tl-name{position:sticky;left:0;z-index:1;flex:none;width:92px;padding:0 10px;background:var(--paper);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid var(--line);height:100%;display:flex;align-items:center}
+.tl-row:hover{background:color-mix(in srgb,var(--leaf-soft) 45%,transparent)}
+.tl-name{position:sticky;left:0;z-index:2;flex:none;width:var(--nw);height:100%;display:flex;align-items:center;gap:7px;padding:0 8px;background:var(--paper);border:0;border-right:1px solid var(--line);text-align:left;min-width:0}
+.tl-name .avatar{width:26px;height:26px;font-size:14px}
+.tl-name>span{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.tl-name b{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-name small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tl-track{position:relative;flex:none;height:100%}
-.bar{position:absolute;top:9px;height:18px;border-radius:9px;background:var(--leaf);min-width:6px;border:0;padding:0}
+.bar{position:absolute;top:13px;height:22px;border-radius:6px;background:var(--leaf);min-width:8px;border:0;padding:0;display:flex;align-items:center;overflow:hidden}
 .bar.gone{background:var(--gone)}
-.bar.now::after{content:"";position:absolute;right:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--sun);border:2px solid var(--paper)}
-.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);margin:10px 2px 0;flex-wrap:wrap}
-.legend i{display:inline-block;width:14px;height:8px;border-radius:4px;margin-right:5px;vertical-align:middle}
+.bar.approx{background:linear-gradient(90deg,color-mix(in srgb,var(--leaf) 30%,transparent),var(--leaf) 34px)}
+.bar.gone.approx{background:linear-gradient(90deg,color-mix(in srgb,var(--gone) 30%,transparent),var(--gone) 34px)}
+.bar.approx .bl{padding-left:14px}
+.bl{font-size:11px;font-weight:600;color:var(--paper);padding:0 8px;white-space:nowrap}
+.bl.out{position:absolute;top:50%;transform:translateY(-50%);color:var(--muted);padding:0}
+.legend{display:flex;gap:6px 14px;font-size:12px;color:var(--muted);margin:10px 2px 0;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:8px;border-radius:3px;margin-right:5px;vertical-align:middle}
+.legend .lg-approx{background:linear-gradient(90deg,color-mix(in srgb,var(--leaf) 35%,transparent),var(--leaf))}
+.legend .lg-today{width:0;height:12px;border-left:2px dashed var(--sun);border-radius:0}
+.tl-note{margin:6px 2px 0;font-size:12px;color:var(--muted)}
+.tl-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.tl-sum>div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:9px 11px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.tl-sum span{font-size:11px;color:var(--muted)}
+.tl-sum b{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-sum small{font-size:11px;color:var(--muted)}
+.seg{display:inline-flex;gap:2px;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:3px;margin-bottom:10px}
+.seg button{border:0;background:none;border-radius:6px;padding:6px 11px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--leaf);color:var(--paper);font-weight:600}
+@media (max-width:420px){.tl-sum b{font-size:13.5px}.tl-sum>div{padding:8px 9px}}
 
 /* fab */
 .fab{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));border:0;border-radius:999px;background:var(--leaf);color:var(--paper);font-family:var(--display);font-weight:600;font-size:14.5px;padding:11px 18px;box-shadow:0 6px 18px rgb(0 0 0 / .18);z-index:5}
@@ -205,8 +237,14 @@ button{cursor:pointer}
 :root{--chip-l:90%;--chip-t:28%}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--chip-l:24%;--chip-t:84%}}
 :root[data-theme="dark"]{--chip-l:24%;--chip-t:84%}
-.routes{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px;display:flex;flex-direction:column;gap:10px}
-.routes h3{font-size:15px}
+.routes{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-top:16px}
+.routes summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 14px;font-weight:600;font-size:14px}
+.routes summary::-webkit-details-marker{display:none}
+.routes summary small{font-weight:400;font-size:12px;color:var(--muted)}
+.routes summary svg{width:18px;height:18px;margin-left:auto;color:var(--muted);transition:transform .2s}
+.routes[open] summary svg{transform:rotate(180deg)}
+.routes summary:hover{color:var(--leaf)}
+.rbody{display:flex;flex-direction:column;gap:10px;padding:0 14px 14px}
 .rbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--bg)}
 .rbar span{height:100%;background:hsl(var(--rh) 50% 55%)}
 .rleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
@@ -332,6 +370,8 @@ button{cursor:pointer}
 .gsec h3{font-size:15.5px;color:var(--leaf);margin-bottom:8px}
 .gsec ul,.gsec ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:7px;font-size:14px;line-height:1.6}
 .gsec b{font-weight:600}
+.gwarn{margin:10px 0 0;padding:10px 12px;border-radius:8px;background:var(--gone-soft);font-size:13.5px;line-height:1.6}
+.gwarn b{font-weight:600;color:var(--gone)}
 .keys{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0;font-size:14px;align-items:center}
 .keys dd{margin:0}
 kbd{display:inline-block;min-width:22px;text-align:center;font:600 12px/1 var(--body);padding:4px 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--bg);color:var(--ink)}
@@ -392,7 +432,7 @@ const LEAVE=["이사 상담을 받아들임","내가 먼저 부탁함","모르�
 const MAX=10;
 
 const S={introSeen:true,photoURLs:new Map(),idbOk:false,lastBackup:"",pendingImport:null,mode:null,db:null,assets:null,canWrite:true,villagers:[],island:{name:""},tab:"now",editIsland:false,dex:{q:"",sp:"",pe:"",st:""}};
-S.sort={now:"",gone:""};
+S.sort={now:"",gone:""};S.tlFilter="all";S.routesOpen=false;try{S.tlFilter=localStorage.getItem("acnh-tlf")||"all";S.routesOpen=!!localStorage.getItem("acnh-routes")}catch(e){}
 try{const t=localStorage.getItem("acnh-tab");if(t)S.tab=t;const so=JSON.parse(localStorage.getItem("acnh-sort")||"null");if(so)S.sort={...S.sort,...so}}catch(e){}
 
 /* ---------- helpers ---------- */
@@ -539,7 +579,7 @@ function render(){
     <li><b>기록은 이 기기에만 저장돼요.</b> 로그인이 필요 없고, 다른 사람과 기록이 섞이지 않아요. 가끔 맨 아래에서 백업 파일을 저장해 두면 기기를 바꿔도 되살릴 수 있어요.</li>
     <li><b>${WIDE()?"왼쪽 ‘새 주민 입주’ 버튼으로":"아래 가운데 + 버튼으로"} 주민을 등록해요.</b> 이름을 두세 글자만 치면 종족, 성격, 생일이 자동으로 채워져요.</li>
     <li><b>날짜가 기억나지 않아도 괜찮아요.</b> “몇 월쯤”이나 “기억 안 나요”로 기록할 수 있어요.</li>
-    ${FINE?"":`<li><b>홈 화면에 추가하면 앱처럼 쓸 수 있어요.</b> 크롬은 메뉴 → 홈 화면에 추가, 사파리는 공유 → 홈 화면에 추가예요.</li>`}
+    ${FINE?"":`<li><b>홈 화면에 추가하면 앱처럼 쓸 수 있어요.</b> 크롬은 메뉴 → 홈 화면에 추가, 사파리는 공유 → 홈 화면에 추가예요. 아이폰은 사파리와 홈 화면 앱의 기록이 따로라서, 홈 화면 앱에서 기록을 시작해 주세요.</li>`}
   </ul><div class="intro-btns"><button class="btn pri" id="introOk">시작하기</button><button class="btn" id="introGuide">자세한 가이드 보기</button></div></section>`;
   if(!S.idbOk)ban+=`<div class="banner"><span>이 브라우저에서는 기록을 저장할 수 없어요. 사생활 보호(시크릿) 모드라면 일반 창에서 열어 주세요.</span></div>`;
   if(!S.canWrite)ban+=`<div class="banner"><span>보기 전용으로 열려 있어요.</span></div>`;
@@ -557,7 +597,7 @@ function render(){
   if(S.tab==="now")view.innerHTML=now.length?listHTML(now,"now"):emptyHTML("아직 등록된 주민이 없어요","섬에 사는 주민을 한 명씩 입주일과 함께 등록해 보세요. 입주한 지 며칠째인지 자동으로 세어 드려요.");
   else if(S.tab==="gone"){const miss=gone.filter(v=>!v.gotPhoto);if(!miss.length)S.goneNoPic=false;
     view.innerHTML=gone.length?(miss.length?`<div class="miss"><span>사진을 못 받고 떠난 주민 <b class="num">${miss.length}</b>명</span><button id="missBtn" aria-pressed="${!!S.goneNoPic}">${S.goneNoPic?"모두 보기":"이 주민만 보기"}</button></div>`:"")+listHTML(S.goneNoPic?miss:gone,"gone"):emptyHTML("떠난 주민이 없어요","주민 카드를 눌러 ‘이사 갔어요’를 기록하면 여기로 옮겨져요. 함께 산 기간과 이사 이유가 남아요.");}
-  else if(S.tab==="timeline"){view.innerHTML=routesHTML()+timelineHTML();const tl=view.querySelector(".tl");if(tl)tl.scrollLeft=tl.scrollWidth}
+  else if(S.tab==="timeline"){view.innerHTML=timelineHTML()+routesHTML();const tl=view.querySelector(".tl");if(tl)tl.scrollLeft=tl.scrollWidth;const rb=view.querySelector("#routesBox");if(rb)rb.addEventListener("toggle",()=>{S.routesOpen=rb.open;try{localStorage.setItem("acnh-routes",rb.open?"1":"")}catch(e){}});view.querySelectorAll("[data-tlf]").forEach(b=>b.onclick=()=>{S.tlFilter=b.dataset.tlf;try{localStorage.setItem("acnh-tlf",S.tlFilter)}catch(e){}render()})}
   else if(S.tab==="guide"){view.innerHTML=guideHTML();const gs=view.querySelector("#guideStart");if(gs)gs.onclick=()=>{S.tab="now";render();window.scrollTo(0,0);openForm()}}
   else{renderDex();return}
   view.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDetail(b.dataset.open));
@@ -589,8 +629,8 @@ function routesHTML(){
   const list=S.villagers.filter(v=>route(v));if(!list.length)return "";
   const c={};list.forEach(v=>{const r=route(v);c[r]=(c[r]||0)+1});
   const ent=ARRIVE.filter(r=>c[r]).map(r=>[r,c[r]]).concat(Object.keys(c).filter(r=>!ARRIVE.includes(r)).map(r=>[r,c[r]]));
-  return `<section class="routes"><h3>이사 경로</h3><div class="rbar">${ent.map(([r,n])=>`<span style="--rh:${RHUE[r]??60};width:${n/list.length*100}%" title="${esc(r)} ${n}명"></span>`).join("")}</div>
-  <div class="rleg">${ent.map(([r,n])=>`<span style="--rh:${RHUE[r]??60}"><i></i>${esc(r)} <b class="num">${n}</b>명</span>`).join("")}</div></section>`;
+  return `<details class="routes" id="routesBox" ${S.routesOpen?"open":""}><summary><span>이사 경로 통계</span><small class="num">${list.length}명</small><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="rbody"><div class="rbar">${ent.map(([r,n])=>`<span style="--rh:${RHUE[r]??60};width:${n/list.length*100}%" title="${esc(r)} ${n}명"></span>`).join("")}</div>
+  <div class="rleg">${ent.map(([r,n])=>`<span style="--rh:${RHUE[r]??60}"><i></i>${esc(r)} <b class="num">${n}</b>명</span>`).join("")}</div></div></details>`;
 }
 
 
@@ -625,7 +665,7 @@ function guideHTML(){
     <li>주민이 <b>떠난 주민</b> 탭으로 옮겨지고, 함께 산 기간이 남아요. 사진을 못 받고 떠난 주민은 따로 모아 볼 수 있어요.</li></ol>`)}
   ${sec("5. 둘러보기",`<ul>
     <li><b>정렬</b>: 사는 주민과 떠난 주민 목록을 이름순, 거주 기간순, 지박령·최애 먼저, 종족별, 성격별로 바꿔 봐요.</li>
-    <li><b>타임라인</b>: 누가 언제부터 언제까지 살았는지 막대로 보여 주고, 이사 경로 통계도 나와요.</li>
+    <li><b>타임라인</b>: 누가 언제부터 언제까지 살았는지 막대로 보여 줘요. 막대 안에 거주 일수가 적혀 있고, 노란 점선이 오늘이에요. 위쪽에서 평균 거주 기간과 가장 오래 산 주민을 볼 수 있고, 아래쪽 <b>이사 경로 통계</b>를 누르면 경로별 주민 수가 펼쳐져요.</li>
     <li><b>도감</b>: 주민 413명 중 몇 명을 만났는지 보여 줘요. 종족, 성격, 만남 여부, 사진 여부로 거를 수 있고, 못 만난 주민을 누르면 바로 등록할 수 있어요.</li></ul>`)}
   ${sec("6. 백업과 기기 옮기기",`<ul>
     <li>맨 아래 <b>백업 파일 저장</b>을 누르면 기록과 사진이 파일 하나로 저장돼요.</li>
@@ -634,7 +674,10 @@ function guideHTML(){
   ${sec("7. 홈 화면에 추가하기",`<ul>
     <li><b>아이폰(사파리)</b>: 아래 공유 버튼 → 홈 화면에 추가</li>
     <li><b>안드로이드(크롬)</b>: 오른쪽 위 메뉴(⋮) → 홈 화면에 추가</li>
-    <li><b>PC(크롬·엣지)</b>: 주소창 오른쪽의 설치 아이콘을 누르면 앱처럼 따로 열려요.</li></ul>`)}
+    <li><b>PC(크롬·엣지)</b>: 주소창 오른쪽의 설치 아이콘을 누르면 앱처럼 따로 열려요.</li>
+    <li><b>업데이트는 자동이에요.</b> 홈 화면 아이콘은 이 사이트를 여는 바로가기라서, 열 때마다 최신 버전으로 열려요. 업데이트해도 기록은 지워지지 않아요. 바뀐 화면이 바로 안 보이면 앱을 완전히 닫았다가 다시 열어 보세요.</li>
+    <li><b>인터넷이 연결돼 있어야 열려요.</b></li></ul>
+    <p class="gwarn"><b>아이폰은 꼭 확인하세요.</b> 사파리와 홈 화면 앱은 기록을 따로 저장해요. 홈 화면에 먼저 추가한 다음, <b>홈 화면 앱 안에서</b> 백업 불러오기를 하고 계속 그 앱으로만 써 주세요. 안드로이드 크롬은 브라우저와 홈 화면 앱이 기록을 같이 써요.</p>`)}
   ${T?"":sec("8. PC 단축키",`<dl class="keys">
     <dt><kbd>N</kbd></dt><dd>새 주민 등록</dd>
     <dt><kbd>1</kbd>~<kbd>5</kbd></dt><dd>사는 주민 · 떠난 주민 · 타임라인 · 도감 · 가이드</dd>
@@ -681,26 +724,60 @@ function card(v){
   </span></button>`;
 }
 function timelineHTML(){
-  const list=S.villagers.filter(v=>v.moveIn&&(isNow(v)||v.moveOut)).sort((a,b)=>a.moveIn.localeCompare(b.moveIn));
-  const skip=S.villagers.length-list.length;
-  if(!list.length&&skip)return `<div class="empty">날짜를 기록한 주민이 아직 없어요. 입주일이나 이사 간 날을 대략이라도 적으면 타임라인에 나타나요.</div>`;
-  if(!list.length)return emptyHTML("타임라인이 비어 있어요","주민을 등록하면 누가 언제부터 언제까지 섬에 살았는지 막대로 한눈에 보여 드려요.");
+  const all=S.villagers.filter(v=>v.moveIn&&(isNow(v)||v.moveOut));
+  const skip=S.villagers.length-all.length;
+  if(!all.length&&skip)return `<div class="empty">날짜를 기록한 주민이 아직 없어요. 입주일이나 이사 간 날을 대략이라도 적으면 타임라인에 나타나요.</div>`;
+  if(!all.length)return emptyHTML("타임라인이 비어 있어요","주민을 등록하면 누가 언제부터 언제까지 섬에 살았는지 막대로 한눈에 보여 드려요.");
+  const f=S.tlFilter||"all";
+  const byIn=(x,y)=>x.moveIn.localeCompare(y.moveIn);
+  const nowL=all.filter(isNow).sort(byIn),goneL=all.filter(v=>!isNow(v)).sort(byIn);
+  const groups=f==="now"?[["",nowL]]:f==="gone"?[["",goneL]]:[["지금 사는 주민",nowL],["떠난 주민",goneL]].filter(g=>g[1].length);
+  const shown=groups.flatMap(g=>g[1]);
+  // summary
+  const days=all.map(v=>({v,n:stayDays(v)})).filter(x=>x.n!=null);
+  const avg=days.length?Math.round(days.reduce((t,x)=>t+x.n,0)/days.length):null;
+  const longest=days.slice().sort((x,y)=>y.n-x.n)[0];
+  const newest=nowL.slice().sort((x,y)=>y.moveIn.localeCompare(x.moveIn))[0];
+  const sum=`<div class="tl-sum">
+    <div><span>평균 거주</span><b class="num">${avg!=null?stayText(avg):"-"}</b></div>
+    <div><span>가장 오래 산 주민</span><b>${longest?esc(longest.v.name):"-"}</b><small class="num">${longest?stayText(longest.n,approx(longest.v)):""}</small></div>
+    <div><span>최근 입주</span><b>${newest?esc(newest.name):"-"}</b><small class="num">${newest?fmtShort(newest.moveIn,newest.inPrec):""}</small></div></div>`;
+  const seg=`<div class="seg" role="group" aria-label="타임라인 보기">${[["all","전체",all.length],["now","사는 주민",nowL.length],["gone","떠난 주민",goneL.length]].map(([k,l,n])=>`<button data-tlf="${k}" aria-pressed="${f===k}">${l} <span class="num">${n}</span></button>`).join("")}</div>`;
+  if(!shown.length)return sum+seg+`<div class="empty">${f==="gone"?"떠난 주민이 없어요.":"지금 사는 주민이 없어요."}</div>`;
+  // scale
+  const NW=WIDE()?164:122;
   const end=todayStr();
-  let start=list[0].moveIn;
-  const [sy,sm]=start.split("-").map(Number);start=`${sy}-${String(sm).padStart(2,"0")}-01`;
-  const total=Math.max(30,daysBetween(start,end)+10);
-  const avail=Math.max(200,(document.querySelector("#view").clientWidth||330)-2-92-6);
-  const ppd=Math.max(avail/total,0.45);
+  const first=shown.reduce((m,v)=>v.moveIn<m?v.moveIn:m,shown[0].moveIn);
+  const [sy,sm]=first.split("-").map(Number);const start=`${sy}-${String(sm).padStart(2,"0")}-01`;
+  const total=Math.max(45,daysBetween(start,end)+12);
+  const avail=Math.max(200,(document.querySelector("#view").clientWidth||330)-2-NW);
+  const ppd=Math.max(avail/total,0.5);
   const W=Math.ceil(total*ppd);
-  // month ticks
-  let ticks="",[y,m]=[sy,sm],step=Math.max(1,Math.ceil(62/(30.4*ppd))),i=0,lastY=null;
-  while(true){const s=`${y}-${String(m).padStart(2,"0")}-01`;const off=daysBetween(start,s);if(off>total)break;
-    if(i%step===0&&off*ppd<W-44)ticks+=`<span class="tick num" style="left:${off*ppd}px">${y!==lastY?`${String(y).slice(2)}년 `:""}${m}월</span>`,lastY=y;
-    i++;m++;if(m>12){m=1;y++}}
-  const rows=list.map(v=>{const a=daysBetween(start,v.moveIn),b=daysBetween(start,v.moveOut||end);
-    return `<div class="tl-row"><div class="tl-name" title="${esc(v.name)}">${esc(v.name)}</div><div class="tl-track" style="width:${W}px"><button class="bar ${isNow(v)?"now":"gone"}" data-open="${esc(v.id)}" style="left:${a*ppd}px;width:${Math.max(6,(b-a)*ppd)}px" aria-label="${esc(v.name)} ${fmtDate(v.moveIn,v.inPrec)}부터 ${v.moveOut?fmtDate(v.moveOut,v.outPrec)+"까지":"지금까지"}"></button></div></div>`}).join("");
-  return `<div class="tl"><div class="tl-inner" style="width:${W+92}px"><div class="tl-head" style="width:${W}px">${ticks}</div>${rows}</div></div>
-  <div class="legend"><span><i style="background:var(--leaf)"></i>지금 사는 주민</span><span><i style="background:var(--gone)"></i>떠난 주민</span><span>막대를 누르면 기록을 볼 수 있어요</span>${skip?`<span>날짜를 모르는 주민 ${skip}명은 빠져 있어요</span>`:""}</div>`;
+  const x=d=>daysBetween(start,d)*ppd;
+  const monthPx=30.4*ppd,step=monthPx>=26?1:monthPx>=13?2:monthPx>=8?3:6;
+  let years="",months="",lines="";
+  for(let [y,m,i]=[sy,sm,0];;i++){const d=`${y}-${String(m).padStart(2,"0")}-01`;const off=x(d);if(off>W)break;
+    const ny=m===1||i===0;
+    const nextY=x(`${y+1}-01-01`);
+    if(ny&&off<W-30&&!(i===0&&m!==1&&nextY-off<52))years+=`<span class="ty num" style="left:${off}px">${y}년</span>`;
+    if(m===1&&i>0)lines+=`<i class="gl yr" style="left:${off}px"></i>`;
+    else lines+=`<i class="gl" style="left:${off}px"></i>`;
+    if((m-1)%step===0&&off<W-30)months+=`<span class="tm num" style="left:${off}px">${m}월</span>`;
+    m++;if(m>12){m=1;y++}}
+  const tx=x(end);
+  lines+=`<i class="gl today" style="left:${tx}px"></i>`;
+  const head=`<div class="tl-head"><div class="tl-corner">${f==="all"?"":""}</div><div class="tl-axis" style="width:${W}px">${years}${months}<span class="tday" style="left:${tx}px">오늘</span></div></div>`;
+  const row=v=>{const a=x(v.moveIn),bx=x(v.moveOut||end),w=Math.max(8,bx-a),n=stayDays(v),now=isNow(v);
+    const lab=now?(n>=1?`${approx(v)?"약 ":""}${n}일째`:"오늘 입주"):(n==null?"":stayText(n,approx(v)));
+    const inside=w>=lab.length*7+18,after=!inside&&(W-bx)>=lab.length*7+10;
+    const ym=(d,pr)=>{if(!d)return "?";const[yy,mm]=d.split("-");return `${yy.slice(2)}.${mm}`};
+    const range=now?`${fmtShort(v.moveIn,v.inPrec).replace("쯤","")}~`:`${ym(v.moveIn)}–${ym(v.moveOut)}`;
+    return `<div class="tl-row"><button class="tl-name" data-open="${esc(v.id)}">${avatar(v)}<span><b>${esc(v.name)}</b><small class="num">${range}</small></span></button>
+    <div class="tl-track" style="width:${W}px"><button class="bar ${now?"now":"gone"} ${v.inPrec==="month"?"approx":""}" data-open="${esc(v.id)}" style="left:${a}px;width:${w}px" aria-label="${esc(v.name)} ${fmtDate(v.moveIn,v.inPrec)}부터 ${now?"지금까지":fmtDate(v.moveOut,v.outPrec)+"까지"}">${inside?`<span class="bl num">${lab}</span>`:""}</button>${after?`<span class="bl out num" style="left:${bx+6}px">${lab}</span>`:""}</div></div>`};
+  const body=groups.map(([g,vs])=>(g?`<div class="tl-group"><span>${g} <span class="num">${vs.length}</span>명</span></div>`:"")+vs.map(row).join("")).join("");
+  return sum+seg+`<div class="tl" style="--nw:${NW}px"><div class="tl-inner" style="width:${W+NW}px">${head}<div class="tl-body"><div class="tl-grid" style="left:${NW}px;width:${W}px">${lines}</div>${body}</div></div></div>
+  <div class="legend"><span><i style="background:var(--leaf)"></i>지금 사는 주민</span><span><i style="background:var(--gone)"></i>떠난 주민</span><span><i class="lg-approx"></i>입주 시기가 대략인 주민</span><span><i class="lg-today"></i>오늘</span></div>
+  <p class="tl-note">이름이나 막대를 누르면 기록을 볼 수 있어요.${skip?` 날짜를 모르는 주민 ${skip}명은 빠져 있어요.`:""}</p>`;
 }
 
 /* ---------- sheets ---------- */
